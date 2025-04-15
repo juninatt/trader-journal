@@ -21,8 +21,8 @@ public class HoldingSnapshot {
     @NotBlank(message = "Asset name is required")
     private String assetName;
 
-    @NotBlank(message = "Asset type is required")
-    private String assetType; // e.g., STOCK, ETF, FOND
+    @NotBlank(message = "Asset type is required, e.g. STOCK, ETF, FOND")
+    private String assetType;
 
     @NotNull(message = "Buy datetime is required")
     private LocalDateTime buyDateTime;
