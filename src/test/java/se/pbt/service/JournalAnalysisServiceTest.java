@@ -1,0 +1,411 @@
+package se.pbt.service;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import se.pbt.model.HoldingSnapshot;
+import se.pbt.model.JournalEntry;
+import se.pbt.testutil.TestDataFactory;
+
+import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.jupiter.api.Assertions.*;
+
+class JournalAnalysisServiceTest {
+
+    private JournalAnalysisService analyzer;
+
+    @BeforeEach
+    void setUp() {
+        analyzer = new JournalAnalysisService();
+    }
+
+    @Nested
+    @DisplayName("calculateTotalChangeKr")
+    class CalculateTotalChangeKr {
+
+        @Test
+        @DisplayName("returns positive change when endValue is greater than startValue")
+        void returnsPositiveChange() {
+            JournalEntry entry = withSingleSnapshot(new BigDecimal("120")); // default start = 100
+            BigDecimal result = analyzer.calculateTotalChangeKr(entry);
+            assertEquals(new BigDecimal("20.0"), result); // (120 - 100) * 1
+        }
+
+        @Test
+        @DisplayName("returns zero change when endValue equals startValue")
+        void returnsZeroChange() {
+            JournalEntry entry = withSingleSnapshot(new BigDecimal("100")); // same as start
+            BigDecimal result = analyzer.calculateTotalChangeKr(entry);
+            assertEquals(new BigDecimal("0.0"), result);
+        }
+
+        @Test
+        @DisplayName("returns negative change when endValue is less than startValue")
+        void returnsNegativeChange() {
+            JournalEntry entry = withSingleSnapshot(new BigDecimal("90")); // default start = 100
+            BigDecimal result = analyzer.calculateTotalChangeKr(entry);
+            assertEquals(new BigDecimal("-10.0"), result); // (90 - 100) * 1
+        }
+    }
+
+
+    @Nested
+    @DisplayName("getMorningBuyCount")
+    class GetMorningBuyCount {
+
+        @Test
+        @DisplayName("counts 1 when buy time is before 11:00")
+        void countsWhenBuyBeforeTen() {
+            LocalDateTime buyTime = LocalDateTime.of(2025, 4, 13, 10, 30);
+            JournalEntry entry = withBuyTime(buyTime);
+
+            int result = analyzer.getMorningBuyCount(entry);
+            assertEquals(1, result);
+        }
+
+        @Test
+        @DisplayName("counts 0 when buy time is 11:00 or later")
+        void doesNotCountWhenBuyAtOrAfterTen() {
+            LocalDateTime buyTime = LocalDateTime.of(2025, 4, 13, 11, 0);
+            JournalEntry entry = withBuyTime(buyTime);
+
+            int result = analyzer.getMorningBuyCount(entry);
+            assertEquals(0, result);
+        }
+
+        @Test
+        @DisplayName("returns 0 when there are no holdings")
+        void returnsZeroWhenNoHoldings() {
+            JournalEntry entry = TestDataFactory.defaultJournalEntry();
+            entry.setSnapshots(List.of()); // no holdings
+
+            int result = analyzer.getMorningBuyCount(entry);
+            assertEquals(0, result);
+        }
+    }
+
+
+    @Nested
+    @DisplayName("getEveningSellCount")
+    class GetEveningSellCount {
+
+        @Test
+        @DisplayName("counts 1 when sell time is 15:00 or later")
+        void countsWhenSellAfterOrAtSixteen() {
+            LocalDateTime sellTime = LocalDateTime.of(2025, 4, 13, 15, 30);
+            JournalEntry entry = withSellTime(sellTime);
+
+            int result = analyzer.getEveningSellCount(entry);
+            assertEquals(1, result);
+        }
+
+        @Test
+        @DisplayName("counts 0 when sell time is before 15:00")
+        void doesNotCountWhenSellBeforeSixteen() {
+            LocalDateTime sellTime = LocalDateTime.of(2025, 4, 13, 14, 45);
+            JournalEntry entry = withSellTime(sellTime);
+
+            int result = analyzer.getEveningSellCount(entry);
+            assertEquals(0, result);
+        }
+
+        @Test
+        @DisplayName("returns 0 when there are no holdings")
+        void returnsZeroWhenNoHoldings() {
+            JournalEntry entry = TestDataFactory.defaultJournalEntry();
+            entry.setSnapshots(List.of()); // no holdings
+
+            int result = analyzer.getEveningSellCount(entry);
+            assertEquals(0, result);
+        }
+    }
+
+
+    @Nested
+    @DisplayName("containsWeekendTrades")
+    class ContainsWeekendTrades {
+
+        @Test
+        @DisplayName("returns true when trade was held over a weekend after buying on a weekday")
+        void returnsTrueIfTradeHeldOverWeekend() {
+            // Friday → Monday
+            LocalDateTime buy = LocalDateTime.of(2025, 4, 11, 14, 0); // Friday
+            LocalDateTime sell = LocalDateTime.of(2025, 4, 14, 10, 0); // Monday
+            JournalEntry entry = withSnapshotPeriod(buy, sell);
+
+            assertTrue(analyzer.containsHeldOverWeekendTrades(entry));
+        }
+
+        @Test
+        @DisplayName("returns false when trade occurs only on weekdays")
+        void returnsFalseIfTradeIsWeekdaysOnly() {
+            // Monday → Tuesday
+            LocalDateTime buy = LocalDateTime.of(2025, 4, 14, 10, 0); // Monday
+            LocalDateTime sell = LocalDateTime.of(2025, 4, 15, 10, 0); // Tuesday
+            JournalEntry entry = withSnapshotPeriod(buy, sell);
+
+            assertFalse(analyzer.containsHeldOverWeekendTrades(entry));
+        }
+
+        @Test
+        @DisplayName("returns false when there are no trades")
+        void returnsFalseWhenNoHoldings() {
+            JournalEntry entry = TestDataFactory.defaultJournalEntry();
+            entry.setSnapshots(List.of());
+
+            assertFalse(analyzer.containsHeldOverWeekendTrades(entry));
+        }
+    }
+
+
+    @Nested
+    @DisplayName("countClosedSnapshots")
+    class CountClosedSnapshots {
+
+        @Test
+        @DisplayName("returns 1 when sellDateTime is set")
+        void returnsOneWhenSnapshotIsClosed() {
+            JournalEntry entry = withSellTimeSet(true);
+            int result = analyzer.countClosedSnapshots(entry);
+            assertEquals(1, result);
+        }
+
+        @Test
+        @DisplayName("returns 0 when sellDateTime is missing")
+        void returnsZeroWhenSnapshotIsOpen() {
+            JournalEntry entry = withSellTimeSet(false);
+            int result = analyzer.countClosedSnapshots(entry);
+            assertEquals(0, result);
+        }
+
+        @Test
+        @DisplayName("returns 0 when there are no snapshots")
+        void returnsZeroWhenNoHoldings() {
+            JournalEntry entry = TestDataFactory.defaultJournalEntry();
+            entry.setSnapshots(List.of());
+
+            int result = analyzer.countClosedSnapshots(entry);
+            assertEquals(0, result);
+        }
+    }
+
+
+    @Nested
+    @DisplayName("countOpenSnapshots")
+    class CountOpenSnapshots {
+
+        @Test
+        @DisplayName("returns 1 when sellDateTime is missing")
+        void returnsOneWhenSnapshotIsOpen() {
+            JournalEntry entry = withSellTimeSet(false);
+            int result = analyzer.countOpenSnapshots(entry);
+            assertEquals(1, result);
+        }
+
+        @Test
+        @DisplayName("returns 0 when sellDateTime is set")
+        void returnsZeroWhenSnapshotIsClosed() {
+            JournalEntry entry = withSellTimeSet(true);
+            int result = analyzer.countOpenSnapshots(entry);
+            assertEquals(0, result);
+        }
+
+        @Test
+        @DisplayName("returns 0 when there are no snapshots")
+        void returnsZeroWhenNoHoldings() {
+            JournalEntry entry = TestDataFactory.defaultJournalEntry();
+            entry.setSnapshots(List.of());
+
+            int result = analyzer.countOpenSnapshots(entry);
+            assertEquals(0, result);
+        }
+    }
+
+
+    @Nested
+    @DisplayName("calculateAverageChangePct")
+    class CalculateAverageChangePct {
+
+        @Test
+        @DisplayName("returns 0 when no active holdings exist")
+        void returnsZeroWhenNoActiveSnapshots() {
+            JournalEntry entry = TestDataFactory.defaultJournalEntry();
+            entry.setSnapshots(List.of()); // no holdings
+
+            BigDecimal result = analyzer.calculateAverageChangePercentage(entry);
+            assertEquals(BigDecimal.ZERO, result);
+        }
+
+        @Test
+        @DisplayName("returns correct percentage for one active holding")
+        void returnsCorrectChangeForSingleSnapshot() {
+            JournalEntry entry = withSnapshots(new BigDecimal("110")); // startValue = 100 → +10%
+            BigDecimal result = analyzer.calculateAverageChangePercentage(entry);
+            assertEquals(new BigDecimal("10.00"), result);
+        }
+
+        @Test
+        @DisplayName("returns correct average when all snapshots have same percentage")
+        void returnsSameChangeAsEachSnapshot() {
+            JournalEntry entry = withSnapshots(
+                    new BigDecimal("110"),
+                    new BigDecimal("110"),
+                    new BigDecimal("110")
+            );
+            BigDecimal result = analyzer.calculateAverageChangePercentage(entry);
+            assertEquals(new BigDecimal("10.00"), result);
+        }
+
+        @Test
+        @DisplayName("returns average of mixed positive and negative changes")
+        void returnsAverageFromMixedChanges() {
+            JournalEntry entry = withSnapshots(
+                    new BigDecimal("110"),  // +10%
+                    new BigDecimal("90")    // -10%
+            );
+            BigDecimal result = analyzer.calculateAverageChangePercentage(entry);
+            assertEquals(new BigDecimal("0.00"), result);
+        }
+
+        @Test
+        @DisplayName("ignores snapshot with null endValue")
+        void ignoresSnapshotWithNullEndValue() {
+            JournalEntry entry = withSnapshots(
+                    new BigDecimal("110"),
+                    null
+            );
+            BigDecimal result = analyzer.calculateAverageChangePercentage(entry);
+            assertEquals(new BigDecimal("10.00"), result);
+        }
+    }
+
+
+    /**
+     * Creates a JournalEntry with a single HoldingSnapshot, where only the end value is overridden.
+     */
+    private JournalEntry withSingleSnapshot(BigDecimal endValue) {
+        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
+        hs.setEndValue(endValue);
+
+        JournalEntry entry = JournalEntry.builder()
+                .date(hs.getBuyDateTime().toLocalDate())
+                .comment("Single snapshot test entry")
+                .build();
+
+        hs.setJournalEntry(entry);
+        entry.setSnapshots(List.of(hs));
+        return entry;
+    }
+
+
+    /**
+     * Creates a JournalEntry with a single HoldingSnapshot, where only the buy time is overridden.
+     * The JournalEntry date is aligned with the buy date.
+     */
+    private JournalEntry withBuyTime(LocalDateTime buyTime) {
+        JournalEntry entry = JournalEntry.builder()
+                .date(buyTime.toLocalDate())
+                .comment("Buy time test entry")
+                .build();
+
+        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
+        hs.setBuyDateTime(buyTime);
+        hs.setJournalEntry(entry);
+        entry.setSnapshots(List.of(hs));
+        return entry;
+    }
+
+
+    /**
+     * Creates a JournalEntry with a single HoldingSnapshot, where sell time is overridden.
+     * The JournalEntry date is aligned with the sell date.
+     */
+    private JournalEntry withSellTime(LocalDateTime sellTime) {
+        JournalEntry entry = JournalEntry.builder()
+                .date(sellTime.toLocalDate())
+                .comment("Sell time test entry")
+                .build();
+
+        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
+        hs.setSellDateTime(sellTime);
+        hs.setJournalEntry(entry);
+        entry.setSnapshots(List.of(hs));
+        return entry;
+    }
+
+    /**
+     * Creates a JournalEntry with a single HoldingSnapshot spanning from the given buy time to sell time.
+     */
+    private JournalEntry withSnapshotPeriod(LocalDateTime buy, LocalDateTime sell) {
+        JournalEntry entry = JournalEntry.builder()
+                .date(buy.toLocalDate())
+                .comment("Snapshot with buy/sell period")
+                .build();
+
+        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
+        hs.setBuyDateTime(buy);
+        hs.setSellDateTime(sell);
+        hs.setJournalEntry(entry);
+        entry.setSnapshots(List.of(hs));
+        return entry;
+    }
+
+
+    /**
+     * Creates a JournalEntry with one HoldingSnapshot where sell time is either set or null.
+     */
+    private JournalEntry withSellTimeSet(boolean includeSellTime) {
+        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
+        LocalDate entryDate = includeSellTime
+                ? LocalDate.of(2025, 4, 14)
+                : hs.getBuyDateTime().toLocalDate();
+
+        hs.setSellDateTime(includeSellTime ? entryDate.atTime(14, 0) : null);
+
+        JournalEntry entry = JournalEntry.builder()
+                .date(entryDate)
+                .comment("Conditional sell snapshot")
+                .build();
+
+        hs.setJournalEntry(entry);
+        entry.setSnapshots(List.of(hs));
+        return entry;
+    }
+
+
+    /**
+     * Creates a JournalEntry with a list of HoldingSnapshots based on provided start/end values.
+     * Pass null as endValue to simulate an incomplete (open) trade.
+     */
+    private JournalEntry withSnapshots(BigDecimal... endValues) {
+        List<HoldingSnapshot> snapshots = new ArrayList<>();
+        LocalDate date = null;
+
+        for (BigDecimal endValue : endValues) {
+            HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
+            hs.setEndValue(endValue);
+            snapshots.add(hs);
+            if (date == null) date = hs.getBuyDateTime().toLocalDate();
+        }
+
+        JournalEntry entry = JournalEntry.builder()
+                .date(date)
+                .comment("Multi-snapshot test entry")
+                .build();
+
+        for (HoldingSnapshot hs : snapshots) {
+            hs.setJournalEntry(entry);
+        }
+
+        entry.setSnapshots(snapshots);
+        return entry;
+    }
+
+}
+
