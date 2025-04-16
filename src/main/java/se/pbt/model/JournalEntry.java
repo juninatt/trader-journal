@@ -34,8 +34,17 @@ public class JournalEntry {
 
     public void addSnapshot(HoldingSnapshot snapshot) {
         if (snapshot != null) {
-            snapshots.add(snapshot);
+            if (snapshot.getJournalEntry() != null && snapshot.getJournalEntry() != this) {
+                throw new IllegalStateException("Snapshot already belongs to another JournalEntry");
+            }
             snapshot.setJournalEntry(this);
+            snapshots.add(snapshot);
+        }
+    }
+
+    public void removeSnapshot(HoldingSnapshot snapshot) {
+        if (snapshots.remove(snapshot)) {
+            snapshot.setJournalEntry(null);
         }
     }
 }

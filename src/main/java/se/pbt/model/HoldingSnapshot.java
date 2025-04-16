@@ -35,7 +35,7 @@ public class HoldingSnapshot {
 
     private BigDecimal endValue;
 
-    @Min(value = 1, message = "Quantity must be at least 1")
+    @Positive(message = "Quantity must be at+ least 1")
     private int quantity;
 
     @PositiveOrZero(message = "Buy fee cannot be negative")
@@ -44,8 +44,10 @@ public class HoldingSnapshot {
     @PositiveOrZero(message = "Sell fee cannot be negative")
     private double sellFee;
 
-    @ManyToOne
-    @JoinColumn(name = "journal_entry_id")
+    private String notes;
+
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "journal_entry_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private JournalEntry journalEntry;
