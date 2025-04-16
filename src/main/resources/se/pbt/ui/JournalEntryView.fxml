@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<VBox spacing="10" xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="se.pbt.ui.JournalEntryController"
+      alignment="TOP_CENTER" style="-fx-padding: 20;">
+
+    <Label text="Latest Journal Entry" style="-fx-font-size: 16px;"/>
+
+    <TableView fx:id="snapshotTable" prefHeight="300" prefWidth="600">
+        <columns>
+            <TableColumn fx:id="assetNameColumn" text="Asset Name"/>
+            <TableColumn fx:id="assetTypeColumn" text="Type"/>
+            <TableColumn fx:id="startValueColumn" text="Start Value"/>
+        </columns>
+    </TableView>
+
+    <HBox spacing="10">
+        <Button text="Add Asset" onAction="#onAddSnapshot"/>
+        <Button text="Edit Selected" onAction="#onEditSnapshot"/>
+        <Button text="Delete Selected" onAction="#onDeleteSnapshot"/>
+    </HBox>
+
+</VBox>
