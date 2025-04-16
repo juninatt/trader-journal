@@ -4,6 +4,7 @@ import se.pbt.model.HoldingSnapshot;
 import se.pbt.model.JournalEntry;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.util.List;
@@ -38,9 +39,9 @@ public class JournalAnalysisService {
         if (valid.isEmpty()) return BigDecimal.ZERO;
 
         return valid.stream()
-                .map(this::calculateChangePct)
+                .map(this::calculateChangePercentage)
                 .reduce(BigDecimal.ZERO, BigDecimal::add)
-                .divide(BigDecimal.valueOf(valid.size()), 2, BigDecimal.ROUND_HALF_UP);
+                .divide(BigDecimal.valueOf(valid.size()), 2, RoundingMode.HALF_UP);
     }
 
     /**
@@ -132,13 +133,13 @@ public class JournalAnalysisService {
     /**
      * Calculates the percentage change of a holding based on buy and sell values.
      */
-    public BigDecimal calculateChangePct(HoldingSnapshot snapshot) {
+    public BigDecimal calculateChangePercentage(HoldingSnapshot snapshot) {
         if (snapshot.getStartValue() == null || snapshot.getStartValue().compareTo(BigDecimal.ZERO) == 0)
             return BigDecimal.ZERO;
 
         return snapshot.getEndValue()
                 .subtract(snapshot.getStartValue())
-                .divide(snapshot.getStartValue(), 4, BigDecimal.ROUND_HALF_UP)
+                .divide(snapshot.getStartValue(), 4, RoundingMode.HALF_UP)
                 .multiply(BigDecimal.valueOf(100));
     }
 }
