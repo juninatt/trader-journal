@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -31,6 +32,11 @@ public class JournalEntry {
     private List<HoldingSnapshot> snapshots = new ArrayList<>();
 
     private String notes;
+
+    /**
+     * The amount of cash held on the trading account for this journal day, not held up in assets.
+     */
+    private BigDecimal cashBalance;
 
     public void addSnapshot(HoldingSnapshot snapshot) {
         if (snapshot != null) {
