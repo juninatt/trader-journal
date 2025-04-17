@@ -17,8 +17,11 @@ At its core, the application logs daily snapshots of your portfolio and stores j
 
 This project uses **JavaFX 17** for its graphical interface. To run the GUI properly, you need to set up the JavaFX runtime on your local machine.
 
+**GUI Main Class:** `se.pbt.ui.TraderJournalGui`  
+This is the class that launches the graphical interface and should be used when running the application.
+
 #### Step 1: Download JavaFX SDK
-1. Go to the Gluon [product page](https://gluonhq.com/products/javafx/)(it´s free)
+1. Go to the Gluon [product page](https://gluonhq.com/products/javafx/) (it´s free)
 2. Download **JavaFX SDK 17** for your operating system.
 3. Extract the SDK to a convenient location, e.g.:
 ```bash 
