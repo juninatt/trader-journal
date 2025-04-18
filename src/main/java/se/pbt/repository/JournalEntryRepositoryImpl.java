@@ -81,11 +81,18 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
     public List<JournalEntry> findAll() {
         EntityManager em = emf.createEntityManager();
         List<JournalEntry> result = em
-                .createQuery("SELECT j FROM JournalEntry j", JournalEntry.class)
+                .createQuery("""
+                    SELECT DISTINCT j
+                    FROM JournalEntry j
+                    LEFT JOIN FETCH j.trades t
+                    LEFT JOIN FETCH t.snapshots
+                    ORDER BY j.date DESC
+                    """, JournalEntry.class)
                 .getResultList();
         em.close();
         return result;
     }
+
 
     /**
      * {@inheritDoc}
@@ -93,10 +100,13 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
     @Override
     public Optional<JournalEntry> findLatestEntry() {
         EntityManager em = emf.createEntityManager();
-        JournalEntry latest = em.createQuery(
-                        "SELECT j FROM JournalEntry j LEFT JOIN FETCH j.snapshots ORDER BY j.date DESC",
-                        JournalEntry.class
-                )
+        JournalEntry latest = em.createQuery("""
+                    SELECT j
+                    FROM JournalEntry j
+                    LEFT JOIN FETCH j.trades t
+                    LEFT JOIN FETCH t.snapshots
+                    ORDER BY j.date DESC
+                    """, JournalEntry.class)
                 .setMaxResults(1)
                 .getResultStream()
                 .findFirst()
@@ -104,4 +114,5 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
         em.close();
         return Optional.ofNullable(latest);
     }
+
 }

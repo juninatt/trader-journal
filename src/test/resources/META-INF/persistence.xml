@@ -7,7 +7,8 @@
     <persistence-unit name="trader-journal-test-pu">
         <!-- Domain classes to persist -->
         <class>se.pbt.model.JournalEntry</class>
-        <class>se.pbt.model.HoldingSnapshot</class>
+        <class>se.pbt.model.Trade</class>
+        <class>se.pbt.model.TradeSnapshot</class>
 
         <properties>
             <!-- H2 in file mode (persistent between runs) -->

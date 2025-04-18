@@ -8,10 +8,9 @@ import java.util.List;
 import java.util.Optional;
 
 /**
- * Handles interaction with the persistence layer for journal entries.
- * Acts as a facade between UI/business layers and the database.
+ * Service layer for working with journal entries and related trades.
  * <p>
- * Also delegates analysis tasks to {@link JournalAnalysisService} for snapshot-related calculations.
+ * Handles saving, fetching, and basic analysis by delegating to {@link JournalAnalysisService}.
  * </p>
  */
 public class JournalEntryService {

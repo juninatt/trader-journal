@@ -7,7 +7,8 @@
     <persistence-unit name="trader-journal-pu">
         <!-- Domain entities -->
         <class>se.pbt.model.JournalEntry</class>
-        <class>se.pbt.model.HoldingSnapshot</class>
+        <class>se.pbt.model.Trade</class>
+        <class>se.pbt.model.TradeSnapshot</class>
 
         <properties>
             <!-- File-based H2 database for persistent storage -->

@@ -37,7 +37,7 @@ class JournalEntryRepositoryImplTest {
 
         Optional<JournalEntry> found = repository.findById(entry.getId());
         assertTrue(found.isPresent());
-        assertEquals(entry.getComment(), found.get().getComment());
+        assertEquals(entry.getNotes(), found.get().getNotes());
     }
 
     @Test
@@ -45,7 +45,7 @@ class JournalEntryRepositoryImplTest {
     void returnsAllEntries() {
         JournalEntry entry1 = TestDataFactory.defaultJournalEntry();
         JournalEntry entry2 = TestDataFactory.defaultJournalEntry();
-        entry2.setComment("Second test entry");
+        entry2.setNotes("Second test entry");
 
         repository.save(entry1);
         repository.save(entry2);

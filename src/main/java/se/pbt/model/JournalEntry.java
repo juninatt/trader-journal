@@ -23,34 +23,33 @@ public class JournalEntry {
     @NotNull(message = "Date is required")
     private LocalDate date;
 
-    @NotNull(message = "Comment is required")
-    private String comment;
+    @NotNull(message = "Notes are required")
+    private String notes;
 
     @OneToMany(mappedBy = "journalEntry", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private List<HoldingSnapshot> snapshots = new ArrayList<>();
-
-    private String notes;
+    @Builder.Default
+    private List<Trade> trades = new ArrayList<>();
 
     /**
      * The amount of cash held on the trading account for this journal day, not held up in assets.
      */
     private BigDecimal cashBalance;
 
-    public void addSnapshot(HoldingSnapshot snapshot) {
-        if (snapshot != null) {
-            if (snapshot.getJournalEntry() != null && snapshot.getJournalEntry() != this) {
-                throw new IllegalStateException("Snapshot already belongs to another JournalEntry");
+    public void addTrade(Trade trade) {
+        if (trade != null) {
+            if (trade.getJournalEntry() != null && trade.getJournalEntry() != this) {
+                throw new IllegalStateException("Trade already belongs to another JournalEntry");
             }
-            snapshot.setJournalEntry(this);
-            snapshots.add(snapshot);
+            trade.setJournalEntry(this);
+            trades.add(trade);
         }
     }
 
-    public void removeSnapshot(HoldingSnapshot snapshot) {
-        if (snapshots.remove(snapshot)) {
-            snapshot.setJournalEntry(null);
+    public void removeTrade(Trade trade) {
+        if (trades.remove(trade)) {
+            trade.setJournalEntry(null);
         }
     }
 }

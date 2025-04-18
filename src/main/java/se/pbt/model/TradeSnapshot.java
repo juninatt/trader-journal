@@ -12,7 +12,7 @@ import java.time.LocalTime;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class HoldingSnapshot {
+public class TradeSnapshot {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -30,11 +30,11 @@ public class HoldingSnapshot {
 
     @NotNull(message = "Start value is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Start value must be positive")
-    private BigDecimal startValue; // TODO: Change field name
+    private BigDecimal startValue;
 
-    private BigDecimal endValue; // TODO: Change field name
+    private BigDecimal endValue;
 
-    @Positive(message = "Quantity must be at+ least 1")
+    @Positive(message = "Quantity must be at least 1")
     private int quantity;
 
     @PositiveOrZero(message = "Buy fee cannot be negative")
@@ -46,8 +46,8 @@ public class HoldingSnapshot {
     private String notes;
 
     @ManyToOne(optional = false)
-    @JoinColumn(name = "journal_entry_id", nullable = false)
+    @JoinColumn(name = "trade_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
-    private JournalEntry journalEntry;
+    private Trade trade;
 }

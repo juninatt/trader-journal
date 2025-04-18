@@ -4,7 +4,7 @@ import javafx.fxml.FXML;
 import javafx.scene.control.TextField;
 import javafx.stage.Stage;
 import lombok.Getter;
-import se.pbt.model.HoldingSnapshot;
+import se.pbt.model.TradeSnapshot;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -14,7 +14,7 @@ import java.time.format.DateTimeParseException;
  * Controller for the Add Asset dialog.
  * <p>
  * Responsible for capturing user input, validating it, and creating
- * a {@link HoldingSnapshot} based on the form fields.
+ * a {@link TradeSnapshot} based on the form fields.
  * </p>
  */
 public class AddAssetController {
@@ -35,19 +35,19 @@ public class AddAssetController {
      * Will be {@code null} if the dialog is closed without saving.
      */
     @Getter
-    private HoldingSnapshot result;
+    private TradeSnapshot result;
 
     /**
      * Handles the Save button click.
      * <p>
-     * Attempts to construct a {@link HoldingSnapshot} from input fields.
+     * Attempts to construct a {@link TradeSnapshot} from input fields.
      * If successful, sets the result and closes the dialog.
      * </p>
      */
     @FXML
     private void onSave() {
         try {
-            result = HoldingSnapshot.builder()
+            result = TradeSnapshot.builder()
                     .assetName(assetNameField.getText())
                     .assetType(assetTypeField.getText())
                     .buyTime(LocalTime.parse(buyTimeField.getText()))

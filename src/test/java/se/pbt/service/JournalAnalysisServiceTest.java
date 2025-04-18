@@ -4,18 +4,18 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import se.pbt.model.HoldingSnapshot;
 import se.pbt.model.JournalEntry;
+import se.pbt.model.Trade;
+import se.pbt.model.TradeSnapshot;
 import se.pbt.testutil.TestDataFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalTime;
-import java.util.ArrayList;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// TODO: Fix weekend related texts
 class JournalAnalysisServiceTest {
 
     private JournalAnalysisService analyzer;
@@ -82,8 +82,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns 0 when there are no holdings")
         void returnsZeroWhenNoHoldings() {
-            JournalEntry entry = TestDataFactory.defaultJournalEntry();
-            entry.setSnapshots(List.of()); // no holdings
+            JournalEntry entry = TestDataFactory.emptytJournalEntry();
 
             int result = analyzer.getMorningBuyCount(entry);
             assertEquals(0, result);
@@ -118,8 +117,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns 0 when there are no holdings")
         void returnsZeroWhenNoHoldings() {
-            JournalEntry entry = TestDataFactory.defaultJournalEntry();
-            entry.setSnapshots(List.of()); // no holdings
+            JournalEntry entry = TestDataFactory.emptytJournalEntry();
 
             int result = analyzer.getEveningSellCount(entry);
             assertEquals(0, result);
@@ -134,10 +132,12 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns true when trade was held over a weekend after buying on a weekday")
         void returnsTrueIfTradeHeldOverWeekend() {
-            // Friday → Monday
-            LocalTime buy = LocalTime.of(14, 0); // Friday
-            LocalTime sell = LocalTime.of(10, 0); // Monday
+            LocalTime buy = LocalTime.of(14, 0);
+            LocalTime sell = LocalTime.of(10, 0);
+
             JournalEntry entry = withSnapshotPeriod(buy, sell);
+
+            entry.setDate(LocalDate.of(2025, 4, 11));
 
             assertTrue(analyzer.containsHeldOverWeekendTrades(entry));
         }
@@ -145,7 +145,6 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns false when trade occurs only on weekdays")
         void returnsFalseIfTradeIsWeekdaysOnly() {
-            // Monday → Tuesday
             LocalTime buy = LocalTime.of(10, 0); // Monday
             LocalTime sell = LocalTime.of(10, 0); // Tuesday
             JournalEntry entry = withSnapshotPeriod(buy, sell);
@@ -156,8 +155,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns false when there are no trades")
         void returnsFalseWhenNoHoldings() {
-            JournalEntry entry = TestDataFactory.defaultJournalEntry();
-            entry.setSnapshots(List.of());
+            JournalEntry entry = TestDataFactory.emptytJournalEntry();
 
             assertFalse(analyzer.containsHeldOverWeekendTrades(entry));
         }
@@ -187,8 +185,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns 0 when there are no snapshots")
         void returnsZeroWhenNoHoldings() {
-            JournalEntry entry = TestDataFactory.defaultJournalEntry();
-            entry.setSnapshots(List.of());
+            JournalEntry entry = TestDataFactory.emptytJournalEntry();
 
             int result = analyzer.countClosedSnapshots(entry);
             assertEquals(0, result);
@@ -219,8 +216,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns 0 when there are no snapshots")
         void returnsZeroWhenNoHoldings() {
-            JournalEntry entry = TestDataFactory.defaultJournalEntry();
-            entry.setSnapshots(List.of());
+            JournalEntry entry = TestDataFactory.emptytJournalEntry();
 
             int result = analyzer.countOpenSnapshots(entry);
             assertEquals(0, result);
@@ -235,8 +231,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("returns 0 when no active holdings exist")
         void returnsZeroWhenNoActiveSnapshots() {
-            JournalEntry entry = TestDataFactory.defaultJournalEntry();
-            entry.setSnapshots(List.of()); // no holdings
+            JournalEntry entry = TestDataFactory.emptytJournalEntry();
 
             BigDecimal result = analyzer.calculateAverageChangePercentage(entry);
             assertEquals(BigDecimal.ZERO, result);
@@ -290,16 +285,12 @@ class JournalAnalysisServiceTest {
      * Creates a JournalEntry with a single HoldingSnapshot, where only the end value is overridden.
      */
     private JournalEntry withSingleSnapshot(BigDecimal endValue) {
-        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        hs.setEndValue(endValue);
+        Trade trade = TestDataFactory.defaultTrade();
+        trade.getSnapshots().get(0).setEndValue(endValue);
 
-        JournalEntry entry = JournalEntry.builder()
-                .date(LocalDate.of(2025, 4, 15))
-                .comment("Single snapshot test entry")
-                .build();
+        JournalEntry entry = TestDataFactory.emptytJournalEntry();
+        entry.addTrade(trade);
 
-        hs.setJournalEntry(entry);
-        entry.setSnapshots(List.of(hs));
         return entry;
     }
 
@@ -308,15 +299,12 @@ class JournalAnalysisServiceTest {
      * The JournalEntry date is fixed for test consistency.
      */
     private JournalEntry withBuyTime(LocalTime buyTime) {
-        JournalEntry entry = JournalEntry.builder()
-                .date(LocalDate.of(2025, 4, 15))
-                .comment("Buy time test entry")
-                .build();
+        Trade trade = TestDataFactory.defaultTrade();
+        trade.getSnapshots().get(0).setBuyTime(buyTime);
 
-        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        hs.setBuyTime(buyTime);
-        hs.setJournalEntry(entry);
-        entry.setSnapshots(List.of(hs));
+        JournalEntry entry = TestDataFactory.emptytJournalEntry();
+        entry.addTrade(trade);
+
         return entry;
     }
 
@@ -324,15 +312,12 @@ class JournalAnalysisServiceTest {
      * Creates a JournalEntry with a single HoldingSnapshot, where sell time is overridden.
      */
     private JournalEntry withSellTime(LocalTime sellTime) {
-        JournalEntry entry = JournalEntry.builder()
-                .date(LocalDate.of(2025, 4, 15))
-                .comment("Sell time test entry")
-                .build();
+        Trade trade = TestDataFactory.defaultTrade();
+        trade.getSnapshots().get(0).setSellTime(sellTime);
 
-        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        hs.setSellTime(sellTime);
-        hs.setJournalEntry(entry);
-        entry.setSnapshots(List.of(hs));
+        JournalEntry entry = TestDataFactory.emptytJournalEntry();
+        entry.addTrade(trade);
+
         return entry;
     }
 
@@ -340,16 +325,14 @@ class JournalAnalysisServiceTest {
      * Creates a JournalEntry with a single HoldingSnapshot spanning from the given buy time to sell time.
      */
     private JournalEntry withSnapshotPeriod(LocalTime buy, LocalTime sell) {
-        JournalEntry entry = JournalEntry.builder()
-                .date(LocalDate.of(2025, 4, 15))
-                .comment("Snapshot with buy/sell period")
-                .build();
+        Trade trade = TestDataFactory.defaultTrade();
+        TradeSnapshot snapshot = trade.getSnapshots().get(0);
+        snapshot.setBuyTime(buy);
+        snapshot.setSellTime(sell);
 
-        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        hs.setBuyTime(buy);
-        hs.setSellTime(sell);
-        hs.setJournalEntry(entry);
-        entry.setSnapshots(List.of(hs));
+        JournalEntry entry = TestDataFactory.emptytJournalEntry();
+        entry.addTrade(trade);
+
         return entry;
     }
 
@@ -357,18 +340,12 @@ class JournalAnalysisServiceTest {
      * Creates a JournalEntry with one HoldingSnapshot where sell time is either set or null.
      */
     private JournalEntry withSellTimeSet(boolean includeSellTime) {
-        HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        LocalDate entryDate = LocalDate.of(2025, 4, 15);
+        Trade trade = TestDataFactory.defaultTrade();
+        trade.getSnapshots().get(0).setSellTime(includeSellTime ? LocalTime.of(14, 0) : null);
 
-        hs.setSellTime(includeSellTime ? LocalTime.of(14, 0) : null);
+        JournalEntry entry = TestDataFactory.emptytJournalEntry();
+        entry.addTrade(trade);
 
-        JournalEntry entry = JournalEntry.builder()
-                .date(entryDate)
-                .comment("Conditional sell snapshot")
-                .build();
-
-        hs.setJournalEntry(entry);
-        entry.setSnapshots(List.of(hs));
         return entry;
     }
 
@@ -377,25 +354,17 @@ class JournalAnalysisServiceTest {
      * Pass null as endValue to simulate an incomplete (open) trade.
      */
     private JournalEntry withSnapshots(BigDecimal... endValues) {
-        List<HoldingSnapshot> snapshots = new ArrayList<>();
-        LocalDate entryDate = LocalDate.of(2025, 4, 15);
+        Trade trade = Trade.builder().label("Multi-snapshot trade").build();
 
         for (BigDecimal endValue : endValues) {
-            HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-            hs.setEndValue(endValue);
-            snapshots.add(hs);
+            TradeSnapshot snapshot = TestDataFactory.defaultSnapshot();
+            snapshot.setEndValue(endValue);
+            trade.addSnapshot(snapshot);
         }
 
-        JournalEntry entry = JournalEntry.builder()
-                .date(entryDate)
-                .comment("Multi-snapshot test entry")
-                .build();
+        JournalEntry entry = TestDataFactory.emptytJournalEntry();
+        entry.addTrade(trade);
 
-        for (HoldingSnapshot hs : snapshots) {
-            hs.setJournalEntry(entry);
-        }
-
-        entry.setSnapshots(snapshots);
         return entry;
     }
 }
