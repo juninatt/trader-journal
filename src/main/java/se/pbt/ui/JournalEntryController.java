@@ -16,6 +16,7 @@ import se.pbt.service.JournalEntryService;
 import se.pbt.service.ServiceLocator;
 
 import java.io.IOException;
+import java.time.LocalTime;
 
 /**
  * JavaFX controller for the main Journal Entry view.
@@ -36,8 +37,8 @@ public class JournalEntryController {
     @FXML private TableColumn<HoldingSnapshot, Number> quantityColumn;
     @FXML private TableColumn<HoldingSnapshot, Number> buyFeeColumn;
     @FXML private TableColumn<HoldingSnapshot, Number> sellFeeColumn;
-    @FXML private TableColumn<HoldingSnapshot, String> buyDateTimeColumn;
-    @FXML private TableColumn<HoldingSnapshot, String> sellDateTimeColumn;
+    @FXML private TableColumn<HoldingSnapshot, LocalTime> buyTimeColumn;
+    @FXML private TableColumn<HoldingSnapshot, LocalTime> sellTimeColumn;
     @FXML private TableColumn<HoldingSnapshot, String> notesColumn;
 
     private final ObservableList<HoldingSnapshot> snapshots = FXCollections.observableArrayList();
@@ -73,8 +74,8 @@ public class JournalEntryController {
         quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
         buyFeeColumn.setCellValueFactory(new PropertyValueFactory<>("buyFee"));
         sellFeeColumn.setCellValueFactory(new PropertyValueFactory<>("sellFee"));
-        buyDateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("buyDateTime"));
-        sellDateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("sellDateTime"));
+        buyTimeColumn.setCellValueFactory(new PropertyValueFactory<>("buyTime"));
+        sellTimeColumn.setCellValueFactory(new PropertyValueFactory<>("sellTime"));
         notesColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
     }
 

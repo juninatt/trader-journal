@@ -5,7 +5,7 @@ import jakarta.validation.constraints.*;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 @Entity
 @Data
@@ -24,10 +24,9 @@ public class HoldingSnapshot {
     @NotBlank(message = "Asset type is required, e.g. STOCK, ETF, FOND")
     private String assetType;
 
-    @NotNull(message = "Buy datetime is required")
-    private LocalDateTime buyDateTime; // TODO: Change to which hour, no date
+    private LocalTime buyTime;
 
-    private LocalDateTime sellDateTime; // TODO: Change to which hour, no date
+    private LocalTime sellTime;
 
     @NotNull(message = "Start value is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Start value must be positive")

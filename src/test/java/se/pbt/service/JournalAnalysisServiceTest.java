@@ -10,7 +10,7 @@ import se.pbt.testutil.TestDataFactory;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -62,7 +62,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("counts 1 when buy time is before 11:00")
         void countsWhenBuyBeforeTen() {
-            LocalDateTime buyTime = LocalDateTime.of(2025, 4, 13, 10, 30);
+            LocalTime buyTime = LocalTime.of(10, 30);
             JournalEntry entry = withBuyTime(buyTime);
 
             int result = analyzer.getMorningBuyCount(entry);
@@ -72,7 +72,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("counts 0 when buy time is 11:00 or later")
         void doesNotCountWhenBuyAtOrAfterTen() {
-            LocalDateTime buyTime = LocalDateTime.of(2025, 4, 13, 11, 0);
+            LocalTime buyTime = LocalTime.of(11, 0);
             JournalEntry entry = withBuyTime(buyTime);
 
             int result = analyzer.getMorningBuyCount(entry);
@@ -98,7 +98,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("counts 1 when sell time is 15:00 or later")
         void countsWhenSellAfterOrAtSixteen() {
-            LocalDateTime sellTime = LocalDateTime.of(2025, 4, 13, 15, 30);
+            LocalTime sellTime = LocalTime.of(15, 30);
             JournalEntry entry = withSellTime(sellTime);
 
             int result = analyzer.getEveningSellCount(entry);
@@ -108,7 +108,7 @@ class JournalAnalysisServiceTest {
         @Test
         @DisplayName("counts 0 when sell time is before 15:00")
         void doesNotCountWhenSellBeforeSixteen() {
-            LocalDateTime sellTime = LocalDateTime.of(2025, 4, 13, 14, 45);
+            LocalTime sellTime = LocalTime.of(14, 45);
             JournalEntry entry = withSellTime(sellTime);
 
             int result = analyzer.getEveningSellCount(entry);
@@ -135,8 +135,8 @@ class JournalAnalysisServiceTest {
         @DisplayName("returns true when trade was held over a weekend after buying on a weekday")
         void returnsTrueIfTradeHeldOverWeekend() {
             // Friday → Monday
-            LocalDateTime buy = LocalDateTime.of(2025, 4, 11, 14, 0); // Friday
-            LocalDateTime sell = LocalDateTime.of(2025, 4, 14, 10, 0); // Monday
+            LocalTime buy = LocalTime.of(14, 0); // Friday
+            LocalTime sell = LocalTime.of(10, 0); // Monday
             JournalEntry entry = withSnapshotPeriod(buy, sell);
 
             assertTrue(analyzer.containsHeldOverWeekendTrades(entry));
@@ -146,8 +146,8 @@ class JournalAnalysisServiceTest {
         @DisplayName("returns false when trade occurs only on weekdays")
         void returnsFalseIfTradeIsWeekdaysOnly() {
             // Monday → Tuesday
-            LocalDateTime buy = LocalDateTime.of(2025, 4, 14, 10, 0); // Monday
-            LocalDateTime sell = LocalDateTime.of(2025, 4, 15, 10, 0); // Tuesday
+            LocalTime buy = LocalTime.of(10, 0); // Monday
+            LocalTime sell = LocalTime.of(10, 0); // Tuesday
             JournalEntry entry = withSnapshotPeriod(buy, sell);
 
             assertFalse(analyzer.containsHeldOverWeekendTrades(entry));
@@ -294,7 +294,7 @@ class JournalAnalysisServiceTest {
         hs.setEndValue(endValue);
 
         JournalEntry entry = JournalEntry.builder()
-                .date(hs.getBuyDateTime().toLocalDate())
+                .date(LocalDate.of(2025, 4, 15))
                 .comment("Single snapshot test entry")
                 .build();
 
@@ -303,37 +303,34 @@ class JournalAnalysisServiceTest {
         return entry;
     }
 
-
     /**
      * Creates a JournalEntry with a single HoldingSnapshot, where only the buy time is overridden.
-     * The JournalEntry date is aligned with the buy date.
+     * The JournalEntry date is fixed for test consistency.
      */
-    private JournalEntry withBuyTime(LocalDateTime buyTime) {
+    private JournalEntry withBuyTime(LocalTime buyTime) {
         JournalEntry entry = JournalEntry.builder()
-                .date(buyTime.toLocalDate())
+                .date(LocalDate.of(2025, 4, 15))
                 .comment("Buy time test entry")
                 .build();
 
         HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        hs.setBuyDateTime(buyTime);
+        hs.setBuyTime(buyTime);
         hs.setJournalEntry(entry);
         entry.setSnapshots(List.of(hs));
         return entry;
     }
 
-
     /**
      * Creates a JournalEntry with a single HoldingSnapshot, where sell time is overridden.
-     * The JournalEntry date is aligned with the sell date.
      */
-    private JournalEntry withSellTime(LocalDateTime sellTime) {
+    private JournalEntry withSellTime(LocalTime sellTime) {
         JournalEntry entry = JournalEntry.builder()
-                .date(sellTime.toLocalDate())
+                .date(LocalDate.of(2025, 4, 15))
                 .comment("Sell time test entry")
                 .build();
 
         HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        hs.setSellDateTime(sellTime);
+        hs.setSellTime(sellTime);
         hs.setJournalEntry(entry);
         entry.setSnapshots(List.of(hs));
         return entry;
@@ -342,31 +339,28 @@ class JournalAnalysisServiceTest {
     /**
      * Creates a JournalEntry with a single HoldingSnapshot spanning from the given buy time to sell time.
      */
-    private JournalEntry withSnapshotPeriod(LocalDateTime buy, LocalDateTime sell) {
+    private JournalEntry withSnapshotPeriod(LocalTime buy, LocalTime sell) {
         JournalEntry entry = JournalEntry.builder()
-                .date(buy.toLocalDate())
+                .date(LocalDate.of(2025, 4, 15))
                 .comment("Snapshot with buy/sell period")
                 .build();
 
         HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        hs.setBuyDateTime(buy);
-        hs.setSellDateTime(sell);
+        hs.setBuyTime(buy);
+        hs.setSellTime(sell);
         hs.setJournalEntry(entry);
         entry.setSnapshots(List.of(hs));
         return entry;
     }
-
 
     /**
      * Creates a JournalEntry with one HoldingSnapshot where sell time is either set or null.
      */
     private JournalEntry withSellTimeSet(boolean includeSellTime) {
         HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
-        LocalDate entryDate = includeSellTime
-                ? LocalDate.of(2025, 4, 14)
-                : hs.getBuyDateTime().toLocalDate();
+        LocalDate entryDate = LocalDate.of(2025, 4, 15);
 
-        hs.setSellDateTime(includeSellTime ? entryDate.atTime(14, 0) : null);
+        hs.setSellTime(includeSellTime ? LocalTime.of(14, 0) : null);
 
         JournalEntry entry = JournalEntry.builder()
                 .date(entryDate)
@@ -378,24 +372,22 @@ class JournalAnalysisServiceTest {
         return entry;
     }
 
-
     /**
      * Creates a JournalEntry with a list of HoldingSnapshots based on provided start/end values.
      * Pass null as endValue to simulate an incomplete (open) trade.
      */
     private JournalEntry withSnapshots(BigDecimal... endValues) {
         List<HoldingSnapshot> snapshots = new ArrayList<>();
-        LocalDate date = null;
+        LocalDate entryDate = LocalDate.of(2025, 4, 15);
 
         for (BigDecimal endValue : endValues) {
             HoldingSnapshot hs = TestDataFactory.defaultSnapshot();
             hs.setEndValue(endValue);
             snapshots.add(hs);
-            if (date == null) date = hs.getBuyDateTime().toLocalDate();
         }
 
         JournalEntry entry = JournalEntry.builder()
-                .date(date)
+                .date(entryDate)
                 .comment("Multi-snapshot test entry")
                 .build();
 
@@ -406,6 +398,4 @@ class JournalAnalysisServiceTest {
         entry.setSnapshots(snapshots);
         return entry;
     }
-
 }
-

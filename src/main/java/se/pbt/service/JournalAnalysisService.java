@@ -7,6 +7,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
+import java.time.LocalTime;
 import java.util.List;
 
 /**
@@ -49,7 +50,7 @@ public class JournalAnalysisService {
      */
     public int countClosedSnapshots(JournalEntry entry) {
         return (int) entry.getSnapshots().stream()
-                .filter(s -> s.getSellDateTime() != null)
+                .filter(s -> s.getSellTime() != null)
                 .count();
     }
 
@@ -58,32 +59,29 @@ public class JournalAnalysisService {
      */
     public int countOpenSnapshots(JournalEntry entry) {
         return (int) entry.getSnapshots().stream()
-                .filter(s -> s.getSellDateTime() == null)
+                .filter(s -> s.getSellTime() == null)
                 .count();
     }
 
     /**
-     * Returns the number of morning buys (before 10:00) in this journal entry.
+     * Returns the number of morning buys (before 11:00) in this journal entry.
      */
     public int getMorningBuyCount(JournalEntry entry) {
-        LocalDate date = entry.getDate();
         return (int) entry.getSnapshots().stream()
-                .filter(s -> s.getBuyDateTime().toLocalDate().isEqual(date))
-                .filter(s -> s.getBuyDateTime().getHour() < 11)
+                .filter(s -> s.getBuyTime() != null && s.getBuyTime().isBefore(LocalTime.of(11, 0)))
                 .count();
     }
 
+
     /**
-     * Returns the number of evening sells (at or after 16:00) in this journal entry.
+     * Returns the number of evening sells (at or after 15:00) in this journal entry.
      */
     public int getEveningSellCount(JournalEntry entry) {
-        LocalDate date = entry.getDate();
         return (int) entry.getSnapshots().stream()
-                .filter(s -> s.getSellDateTime() != null &&
-                        s.getSellDateTime().toLocalDate().isEqual(date) &&
-                        s.getSellDateTime().getHour() >= 15)
+                .filter(s -> s.getSellTime() != null && !s.getSellTime().isBefore(LocalTime.of(15, 0)))
                 .count();
     }
+
 
     /**
      * Returns true if any snapshot was held over a weekend, based on buy and sell dates.
@@ -98,10 +96,10 @@ public class JournalAnalysisService {
      * Returns true if the trade started on a weekday and was sold after at least one weekend passed.
      */
     public boolean crossesWeekend(HoldingSnapshot snapshot) {
-        if (snapshot.getBuyDateTime() == null || snapshot.getSellDateTime() == null) return false;
+        if (snapshot.getBuyTime() == null || snapshot.getSellTime() == null) return false;
 
-        LocalDate buyDate = snapshot.getBuyDateTime().toLocalDate();
-        LocalDate sellDate = snapshot.getSellDateTime().toLocalDate();
+        LocalDate buyDate = LocalDate.from(snapshot.getBuyTime());
+        LocalDate sellDate = LocalDate.from(snapshot.getSellTime());
 
         DayOfWeek buyDay = buyDate.getDayOfWeek();
         if (buyDay == DayOfWeek.SATURDAY || buyDay == DayOfWeek.SUNDAY) return false;

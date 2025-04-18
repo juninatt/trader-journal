@@ -7,7 +7,7 @@ import lombok.Getter;
 import se.pbt.model.HoldingSnapshot;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.format.DateTimeParseException;
 
 /**
@@ -21,8 +21,8 @@ public class AddAssetController {
 
     @FXML private TextField assetNameField;
     @FXML private TextField assetTypeField;
-    @FXML private TextField buyDateTimeField;
-    @FXML private TextField sellDateTimeField;
+    @FXML private TextField buyTimeField;
+    @FXML private TextField sellTimeField;
     @FXML private TextField startValueField;
     @FXML private TextField endValueField;
     @FXML private TextField quantityField;
@@ -50,8 +50,8 @@ public class AddAssetController {
             result = HoldingSnapshot.builder()
                     .assetName(assetNameField.getText())
                     .assetType(assetTypeField.getText())
-                    .buyDateTime(LocalDateTime.parse(buyDateTimeField.getText()))
-                    .sellDateTime(parseNullableDateTime(sellDateTimeField.getText()))
+                    .buyTime(LocalTime.parse(buyTimeField.getText()))
+                    .sellTime(parseNullableTime(sellTimeField.getText()))
                     .startValue(new BigDecimal(startValueField.getText()))
                     .endValue(parseNullableBigDecimal(endValueField.getText()))
                     .quantity(Integer.parseInt(quantityField.getText()))
@@ -90,10 +90,10 @@ public class AddAssetController {
      * Tries to parse the input string into a LocalDateTime.
      * Returns null if the input is empty or not a valid date-time.
      */
-    private LocalDateTime parseNullableDateTime(String input) {
+    private LocalTime parseNullableTime(String input) {
         if (input == null || input.isBlank()) return null;
         try {
-            return LocalDateTime.parse(input.trim());
+            return LocalTime.parse(input.trim());
         } catch (DateTimeParseException e) {
             return null;
         }

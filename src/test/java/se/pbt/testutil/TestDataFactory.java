@@ -5,7 +5,7 @@ import se.pbt.model.JournalEntry;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.time.LocalTime;
 
 /**
  * Utility class for creating domain test objects with predefined default values.
@@ -50,8 +50,8 @@ public class TestDataFactory {
         HoldingSnapshot hs = new HoldingSnapshot();
         hs.setAssetName("Default Asset");
         hs.setAssetType("STOCK");
-        hs.setBuyDateTime(LocalDateTime.of(2025, 4, 13, 9, 0));
-        hs.setSellDateTime(LocalDateTime.of(2025, 4, 13, 15, 0));
+        hs.setBuyTime(LocalTime.of(9, 0));
+        hs.setSellTime(LocalTime.of(15, 0));
         hs.setStartValue(new BigDecimal("100"));
         hs.setEndValue(new BigDecimal("110"));
         hs.setQuantity(1);

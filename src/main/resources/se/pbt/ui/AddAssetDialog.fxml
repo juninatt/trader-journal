@@ -20,11 +20,11 @@
         <Label text="Type:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
         <TextField fx:id="assetTypeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
 
-        <Label text="Buy DateTime (yyyy-MM-ddTHH:mm):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
-        <TextField fx:id="buyDateTimeField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+        <Label text="Buy Time (e.g. 09:30):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="buyTimeField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
 
-        <Label text="Sell DateTime (optional):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
-        <TextField fx:id="sellDateTimeField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+        <Label text="Sell Time (e.g. 15:45):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="sellTimeField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
 
         <Label text="Start Value:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
         <TextField fx:id="startValueField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>

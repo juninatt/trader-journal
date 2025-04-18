@@ -19,8 +19,8 @@
         <columns>
             <TableColumn fx:id="assetNameColumn" text="Asset Name"/>
             <TableColumn fx:id="assetTypeColumn" text="Type"/>
-            <TableColumn fx:id="buyDateTimeColumn" text="Buy Time"/>
-            <TableColumn fx:id="sellDateTimeColumn" text="Sell Time"/>
+            <TableColumn fx:id="buyTimeColumn" text="Buy Time"/>
+            <TableColumn fx:id="sellTimeColumn" text="Sell Time"/>
             <TableColumn fx:id="startValueColumn" text="Start Value"/>
             <TableColumn fx:id="endValueColumn" text="End Value"/>
             <TableColumn fx:id="quantityColumn" text="Quantity"/>
