@@ -1,8 +1,12 @@
 # Trader-Journal
 
-**Trader-Journal** is a personal investment logging application built in Java. 
+**Trader-Journal** is a personal investment journal built in Java that helps you manually track and reflect on your trading decisions over time.
 
-At its core, the application logs daily snapshots of your portfolio and stores journal entries using JPA and an embedded H2 database.
+Each day, you can create a journal entry that contains detailed information about the assets you’ve bought or sold, along with notes and comments. 
+The data is stored using JPA and an embedded H2 database, making it easy to save and revisit past entries.
+
+Functionality for analyzing entries and identifying behavioral patterns and trends is currently under development. 
+This will make it easier to spot habits, strengths, and areas for improvement in your trading over time.
 
 ## Tech Stack
 
@@ -13,7 +17,7 @@ At its core, the application logs daily snapshots of your portfolio and stores j
 - H2 (in-memory database)
 - Lombok
 
-### JavaFX Setup (Required to run GUI)
+### JavaFX Setup
 
 This project uses **JavaFX 17** for its graphical interface. To run the GUI properly, you need to set up the JavaFX runtime on your local machine.
 
