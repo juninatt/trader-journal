@@ -286,7 +286,8 @@ class JournalAnalysisServiceTest {
      */
     private JournalEntry withSingleSnapshot(BigDecimal endValue) {
         Trade trade = TestDataFactory.defaultTrade();
-        trade.getSnapshots().get(0).setEndValue(endValue);
+        TradeSnapshot snapshot = trade.getSnapshots().iterator().next();
+        snapshot.setEndValue(endValue);
 
         JournalEntry entry = TestDataFactory.emptytJournalEntry();
         entry.addTrade(trade);
@@ -300,7 +301,8 @@ class JournalAnalysisServiceTest {
      */
     private JournalEntry withBuyTime(LocalTime buyTime) {
         Trade trade = TestDataFactory.defaultTrade();
-        trade.getSnapshots().get(0).setBuyTime(buyTime);
+        TradeSnapshot snapshot = trade.getSnapshots().iterator().next();
+        snapshot.setBuyTime(buyTime);
 
         JournalEntry entry = TestDataFactory.emptytJournalEntry();
         entry.addTrade(trade);
@@ -313,7 +315,8 @@ class JournalAnalysisServiceTest {
      */
     private JournalEntry withSellTime(LocalTime sellTime) {
         Trade trade = TestDataFactory.defaultTrade();
-        trade.getSnapshots().get(0).setSellTime(sellTime);
+        TradeSnapshot snapshot = trade.getSnapshots().iterator().next();
+        snapshot.setSellTime(sellTime);
 
         JournalEntry entry = TestDataFactory.emptytJournalEntry();
         entry.addTrade(trade);
@@ -326,7 +329,7 @@ class JournalAnalysisServiceTest {
      */
     private JournalEntry withSnapshotPeriod(LocalTime buy, LocalTime sell) {
         Trade trade = TestDataFactory.defaultTrade();
-        TradeSnapshot snapshot = trade.getSnapshots().get(0);
+        TradeSnapshot snapshot = trade.getSnapshots().iterator().next();
         snapshot.setBuyTime(buy);
         snapshot.setSellTime(sell);
 
@@ -341,7 +344,8 @@ class JournalAnalysisServiceTest {
      */
     private JournalEntry withSellTimeSet(boolean includeSellTime) {
         Trade trade = TestDataFactory.defaultTrade();
-        trade.getSnapshots().get(0).setSellTime(includeSellTime ? LocalTime.of(14, 0) : null);
+        TradeSnapshot snapshot = trade.getSnapshots().iterator().next();
+        snapshot.setSellTime(includeSellTime ? LocalTime.of(14, 0) : null);
 
         JournalEntry entry = TestDataFactory.emptytJournalEntry();
         entry.addTrade(trade);
