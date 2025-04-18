@@ -31,9 +31,9 @@ public class HoldingSnapshot {
 
     @NotNull(message = "Start value is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Start value must be positive")
-    private BigDecimal startValue;
+    private BigDecimal startValue; // TODO: Change field name
 
-    private BigDecimal endValue;
+    private BigDecimal endValue; // TODO: Change field name
 
     @Positive(message = "Quantity must be at+ least 1")
     private int quantity;

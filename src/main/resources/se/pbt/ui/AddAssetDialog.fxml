@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox xmlns="http://javafx.com/javafx"
+      xmlns:fx="http://javafx.com/fxml"
+      fx:controller="se.pbt.ui.AddAssetController"
+      spacing="10">
+    <padding>
+        <Insets top="10" right="10" bottom="10" left="10"/>
+    </padding>
+
+    <Label text="Add New Asset"/>
+
+    <GridPane hgap="10" vgap="10">
+        <Label text="Asset Name:" GridPane.rowIndex="0" GridPane.columnIndex="0"/>
+        <TextField fx:id="assetNameField" GridPane.rowIndex="0" GridPane.columnIndex="1"/>
+
+        <Label text="Type:" GridPane.rowIndex="1" GridPane.columnIndex="0"/>
+        <TextField fx:id="assetTypeField" GridPane.rowIndex="1" GridPane.columnIndex="1"/>
+
+        <Label text="Buy DateTime (yyyy-MM-ddTHH:mm):" GridPane.rowIndex="2" GridPane.columnIndex="0"/>
+        <TextField fx:id="buyDateTimeField" GridPane.rowIndex="2" GridPane.columnIndex="1"/>
+
+        <Label text="Sell DateTime (optional):" GridPane.rowIndex="3" GridPane.columnIndex="0"/>
+        <TextField fx:id="sellDateTimeField" GridPane.rowIndex="3" GridPane.columnIndex="1"/>
+
+        <Label text="Start Value:" GridPane.rowIndex="4" GridPane.columnIndex="0"/>
+        <TextField fx:id="startValueField" GridPane.rowIndex="4" GridPane.columnIndex="1"/>
+
+        <Label text="End Value (optional):" GridPane.rowIndex="5" GridPane.columnIndex="0"/>
+        <TextField fx:id="endValueField" GridPane.rowIndex="5" GridPane.columnIndex="1"/>
+
+        <Label text="Quantity:" GridPane.rowIndex="6" GridPane.columnIndex="0"/>
+        <TextField fx:id="quantityField" GridPane.rowIndex="6" GridPane.columnIndex="1"/>
+
+        <Label text="Buy Fee:" GridPane.rowIndex="7" GridPane.columnIndex="0"/>
+        <TextField fx:id="buyFeeField" GridPane.rowIndex="7" GridPane.columnIndex="1"/>
+
+        <Label text="Sell Fee:" GridPane.rowIndex="8" GridPane.columnIndex="0"/>
+        <TextField fx:id="sellFeeField" GridPane.rowIndex="8" GridPane.columnIndex="1"/>
+
+        <Label text="Notes:" GridPane.rowIndex="9" GridPane.columnIndex="0"/>
+        <TextField fx:id="notesField" GridPane.rowIndex="9" GridPane.columnIndex="1"/>
+    </GridPane>
+
+    <HBox spacing="10">
+        <Button text="Save" onAction="#onSave"/>
+        <Button text="Cancel" onAction="#onCancel"/>
+    </HBox>
+</VBox>

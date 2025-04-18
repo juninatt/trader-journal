@@ -1,14 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.*?>
-
+<?import javafx.scene.layout.HBox?>
+<?import javafx.scene.layout.VBox?>
 <VBox spacing="10" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="se.pbt.ui.JournalEntryController"
       alignment="TOP_CENTER" style="-fx-padding: 20;">
 
     <Label text="Latest Journal Entry" style="-fx-font-size: 16px;"/>
+
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Label text="Comment:"/>
+        <TextField fx:id="commentField" prefWidth="400"/>
+    </HBox>
 
     <TableView fx:id="snapshotTable" prefHeight="300" prefWidth="600">
         <columns>
@@ -19,9 +24,10 @@
     </TableView>
 
     <HBox spacing="10">
-        <Button text="Add Asset" onAction="#onAddSnapshot"/>
+        <Button text="Add Asset" onAction="#handleAddAsset"/>
         <Button text="Edit Selected" onAction="#onEditSnapshot"/>
         <Button text="Delete Selected" onAction="#onDeleteSnapshot"/>
+        <Button text="Save Journal Entry" onAction="#handleSaveJournalEntry"/>
     </HBox>
 
 </VBox>
