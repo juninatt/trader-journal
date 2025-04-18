@@ -23,7 +23,7 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
     }
 
     /**
-     * Persists a new {@link JournalEntry} to the database.
+     * {@inheritDoc}
      */
     @Override
     public void save(JournalEntry entry) {
@@ -35,7 +35,7 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
     }
 
     /**
-     * Removes the given {@link JournalEntry} from the database if it exists.
+     * {@inheritDoc}
      */
     @Override
     public boolean remove(JournalEntry entry) {
@@ -64,7 +64,7 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
 
 
     /**
-     * Retrieves a {@link JournalEntry} by its ID, if it exists.
+     * {@inheritDoc}
      */
     @Override
     public Optional<JournalEntry> findById(Long id) {
@@ -75,7 +75,7 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
     }
 
     /**
-     * Retrieves all {@link JournalEntry} records from the database.
+     * {@inheritDoc}
      */
     @Override
     public List<JournalEntry> findAll() {
@@ -85,5 +85,23 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
                 .getResultList();
         em.close();
         return result;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    @Override
+    public Optional<JournalEntry> findLatestEntry() {
+        EntityManager em = emf.createEntityManager();
+        JournalEntry latest = em.createQuery(
+                        "SELECT j FROM JournalEntry j LEFT JOIN FETCH j.snapshots ORDER BY j.date DESC",
+                        JournalEntry.class
+                )
+                .setMaxResults(1)
+                .getResultStream()
+                .findFirst()
+                .orElse(null);
+        em.close();
+        return Optional.ofNullable(latest);
     }
 }

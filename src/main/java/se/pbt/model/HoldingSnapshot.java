@@ -25,9 +25,9 @@ public class HoldingSnapshot {
     private String assetType;
 
     @NotNull(message = "Buy datetime is required")
-    private LocalDateTime buyDateTime;
+    private LocalDateTime buyDateTime; // TODO: Change to which hour, no date
 
-    private LocalDateTime sellDateTime;
+    private LocalDateTime sellDateTime; // TODO: Change to which hour, no date
 
     @NotNull(message = "Start value is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Start value must be positive")

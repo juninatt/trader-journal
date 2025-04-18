@@ -28,10 +28,17 @@ public class JournalEntryController {
 
     @FXML private TextField commentField;
 
-    @FXML private TableView<HoldingSnapshot> snapshotTable; // TODO: Add more columns and other info
+    @FXML private TableView<HoldingSnapshot> snapshotTable;
     @FXML private TableColumn<HoldingSnapshot, String> assetNameColumn;
     @FXML private TableColumn<HoldingSnapshot, String> assetTypeColumn;
     @FXML private TableColumn<HoldingSnapshot, Number> startValueColumn;
+    @FXML private TableColumn<HoldingSnapshot, Number> endValueColumn;
+    @FXML private TableColumn<HoldingSnapshot, Number> quantityColumn;
+    @FXML private TableColumn<HoldingSnapshot, Number> buyFeeColumn;
+    @FXML private TableColumn<HoldingSnapshot, Number> sellFeeColumn;
+    @FXML private TableColumn<HoldingSnapshot, String> buyDateTimeColumn;
+    @FXML private TableColumn<HoldingSnapshot, String> sellDateTimeColumn;
+    @FXML private TableColumn<HoldingSnapshot, String> notesColumn;
 
     private final ObservableList<HoldingSnapshot> snapshots = FXCollections.observableArrayList();
 
@@ -39,19 +46,38 @@ public class JournalEntryController {
     private JournalEntry journalEntry;
 
     /**
-     * Initializes the controller after its FXML file has been loaded.
-     * Binds table columns to snapshot properties and initializes a new journal entry.
+     * Initializes the controller after FXML loading.
+     * <p>
+     * Binds table columns to snapshot properties, initializes or loads the most recent journal entry,
+     * and populates the snapshot table with relevant data.
+     * </p>
      */
     @FXML
     public void initialize() {
         snapshotTable.setItems(snapshots);
+        snapshotTable.setColumnResizePolicy(TableView.CONSTRAINED_RESIZE_POLICY);
+
         journalEntryService = ServiceLocator.getJournalEntryService();
         journalEntry = new JournalEntry();
+
+        journalEntryService.getLatestEntry().ifPresentOrElse(entry -> {
+            journalEntry = entry;
+            snapshots.setAll(entry.getSnapshots());
+        }, () -> journalEntry = new JournalEntry());
+
 
         assetNameColumn.setCellValueFactory(new PropertyValueFactory<>("assetName"));
         assetTypeColumn.setCellValueFactory(new PropertyValueFactory<>("assetType"));
         startValueColumn.setCellValueFactory(new PropertyValueFactory<>("startValue"));
+        endValueColumn.setCellValueFactory(new PropertyValueFactory<>("endValue"));
+        quantityColumn.setCellValueFactory(new PropertyValueFactory<>("quantity"));
+        buyFeeColumn.setCellValueFactory(new PropertyValueFactory<>("buyFee"));
+        sellFeeColumn.setCellValueFactory(new PropertyValueFactory<>("sellFee"));
+        buyDateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("buyDateTime"));
+        sellDateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("sellDateTime"));
+        notesColumn.setCellValueFactory(new PropertyValueFactory<>("notes"));
     }
+
 
     /**
      * Opens a dialog window for adding a new asset.

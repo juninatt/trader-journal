@@ -25,5 +25,11 @@ public interface JournalEntryRepository {
      * Retrieves all {@link JournalEntry} records stored in the database.
      */
     List<JournalEntry> findAll();
+
+    /**
+     * Retrieves the most recently created {@link JournalEntry} based on date.
+     */
+    Optional<JournalEntry> findLatestEntry();
+
 }
 

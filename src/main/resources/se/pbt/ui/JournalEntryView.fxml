@@ -15,13 +15,21 @@
         <TextField fx:id="commentField" prefWidth="400"/>
     </HBox>
 
-    <TableView fx:id="snapshotTable" prefHeight="300" prefWidth="600">
+    <TableView fx:id="snapshotTable" prefHeight="300" prefWidth="1000">
         <columns>
             <TableColumn fx:id="assetNameColumn" text="Asset Name"/>
             <TableColumn fx:id="assetTypeColumn" text="Type"/>
+            <TableColumn fx:id="buyDateTimeColumn" text="Buy Time"/>
+            <TableColumn fx:id="sellDateTimeColumn" text="Sell Time"/>
             <TableColumn fx:id="startValueColumn" text="Start Value"/>
+            <TableColumn fx:id="endValueColumn" text="End Value"/>
+            <TableColumn fx:id="quantityColumn" text="Quantity"/>
+            <TableColumn fx:id="buyFeeColumn" text="Buy Fee"/>
+            <TableColumn fx:id="sellFeeColumn" text="Sell Fee"/>
+            <TableColumn fx:id="notesColumn" text="Notes"/>
         </columns>
     </TableView>
+
 
     <HBox spacing="10">
         <Button text="Add Asset" onAction="#handleAddAsset"/>

@@ -49,6 +49,14 @@ public class JournalEntryService {
     }
 
     /**
+     * Retrieves the most recent journal entry if one exists.
+     */
+    public Optional<JournalEntry> getLatestEntry() {
+        return journalRepo.findLatestEntry();
+    }
+
+
+    /**
      * Calculates the total change in currency for a specific journal entry.
      */
     public BigDecimal getTotalChangeForEntry(Long id) {
