@@ -47,10 +47,18 @@ public class TradeSnapshot {
      */
     private LocalTime sellTime;
 
+    /**
+     * The asset's value at the time of purchase.
+     * Used as the trade’s buy value if this snapshot is the first in the trade.
+     */
     @NotNull(message = "Start value is required")
     @Positive(message = "Start value must be positive")
     private BigDecimal startValue;
 
+    /**
+     * The asset's value at the time of sale.
+     * Used as the trade’s sell value if this snapshot is the last in the trade.
+     */
     @PositiveOrZero(message = "End value must be positive")
     private BigDecimal endValue;
 
@@ -60,11 +68,11 @@ public class TradeSnapshot {
 
     @NotNull
     @PositiveOrZero(message = "Buy fee cannot be negative")
-    private double buyFee;
+    private double buyFee; // TODO: Move to Trade?
 
     @NotNull
     @PositiveOrZero(message = "Sell fee cannot be negative")
-    private double sellFee;
+    private double sellFee; // TODO: Move to Trade?
 
     /**
      * Any notes related to this specific snapshot, e.g. strategy or emotions.
