@@ -2,13 +2,10 @@ package se.pbt.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
+import se.pbt.model.asset.Asset;
 
 import java.math.BigDecimal;
 import java.time.LocalTime;
@@ -37,13 +34,6 @@ public class Trade {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
-    /**
-     * The name of the traded asset, e.g., "Apple", "Tesla", or "SP500 ETF".
-     * Used for display and grouping purposes.
-     */
-    @NotBlank(message = "Asset name is required")
-    private String asset;
 
     /**
      * The total number of units initially purchased in this trade.
@@ -93,12 +83,23 @@ public class Trade {
 
 
     /**
+     * The asset being traded.
+     * Every trade must reference one asset; an asset can be shared across multiple trades.
+     */
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "asset_id", nullable = false)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
+    private Asset asset;
+
+    /**
      * All snapshots associated with this trade.
      * Each snapshot represents the state of the trade on a particular day.
      */
     @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, orphanRemoval = true)
     @Builder.Default
     private Set<TradeSnapshot> tradeSnapshots = new HashSet<>();
+
 
     /**
      * Adds a {@link TradeSnapshot} to this trade and sets the back-reference.
