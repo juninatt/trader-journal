@@ -2,7 +2,10 @@ package se.pbt.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -10,12 +13,12 @@ import java.util.HashSet;
 import java.util.Set;
 
 /**
- * Represents a single journal entry for a specific trading day.
+ * Represents a daily journal entry that logs all trading activity for a specific date.
  * <p>
- * A {@code JournalEntry} encapsulates the full trading context of a single date, including optional notes
- * and the cash balance not invested in assets. It aggregates one or more {@link Trade} instances,
- * each of which may contain multiple {@link TradeSnapshot}s representing daily views of an individual trade.
- * This class serves as the root entity for tracking and analyzing trades on a given day.
+ * It encapsulates commentary, available cash, invested capital, and all {@link TradeSnapshot}s created on that day.
+ * </p>
+ * <p>
+ * TradeSnapshots within this entry describe the daily state of trades being tracked or updated.
  * </p>
  */
 @Entity
@@ -29,46 +32,62 @@ public class JournalEntry {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotNull(message = "Date is required")
+    /**
+     * Optional commentary or reflection tied to this journal entry.
+     * Can include trade rationale, market observations, or emotional state.
+     */
+    @Column(length = 5000)
+    private String entryText;
+
+    /**
+     * The amount of cash available in the account at the end of the day.
+     * Can be negative due to fees, leverage, or foreign exchange effects.
+     */
+    @NotNull(message = "Cash amount is required")
+    @Column(precision = 15, scale = 2)
+    private BigDecimal availableCash;
+
+    /**
+     * The total amount of capital invested in trades as of this journal entry.
+     * Can be negative when using leveraged or inverse instruments.
+     * <p>
+     * Calculated from all {@link TradeSnapshot}s associated with the entry.
+     * </p>
+     * TODO: Implement logic to calculate based on trade snapshots.
+     */
+    @NotNull(message = "Invested amount required")
+    @Column(precision = 15, scale = 2)
+    private BigDecimal investedCapital;
+
+    /**
+     * The calendar date this journal entry corresponds to.
+     * Each entry must be unique per date.
+     */
+    @NotNull(message = "Journal date is required")
     private LocalDate date;
 
-    @NotNull(message = "Notes are required")
-    private String notes;
 
     /**
-     * The set of trades associated with this journal entry.
-     * Each trade can contain one or more snapshots representing the progression of an asset.
+     * All snapshots of trades recorded for this day.
+     * Each snapshot represents a trade’s state on this specific date.
      */
     @OneToMany(mappedBy = "journalEntry", cascade = CascadeType.ALL, orphanRemoval = true)
-    @ToString.Exclude
-    @EqualsAndHashCode.Exclude
     @Builder.Default
-    private Set<Trade> trades = new HashSet<>();
+    private Set<TradeSnapshot> tradeSnapshots = new HashSet<>();
+
+
 
     /**
-     * The amount of cash held on the trading account for this journal day, not held up in assets.
+     * Adds a {@link TradeSnapshot} to this journal entry and sets the back-reference.
+     * TODO: Improve error handling
      */
-    private BigDecimal cashBalance;
-
-    /**
-     * Adds a trade to the journal entry and sets the back-reference.
-     */
-    public void addTrade(Trade trade) {
-        if (trade != null) {
-            if (trade.getJournalEntry() != null && trade.getJournalEntry() != this) {
-                throw new IllegalStateException("Trade already belongs to another JournalEntry");
+    public void addTradeSnapshot(TradeSnapshot snapshot) {
+        if (snapshot != null) {
+            if (snapshot.getJournalEntry() != null && snapshot.getJournalEntry() != this) {
+                throw new IllegalStateException("Snapshot already belongs to another JournalEntry");
             }
-            trade.setJournalEntry(this);
-            trades.add(trade);
-        }
-    }
-
-    /**
-     * Removes a trade from the journal entry and clears the back-reference.
-     */
-    public void removeTrade(Trade trade) {
-        if (trades.remove(trade)) {
-            trade.setJournalEntry(null);
+            snapshot.setJournalEntry(this);
+            tradeSnapshots.add(snapshot);
         }
     }
 }

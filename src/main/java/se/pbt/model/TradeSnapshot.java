@@ -1,23 +1,26 @@
 package se.pbt.model;
 
 import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Positive;
 import jakarta.validation.constraints.PositiveOrZero;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalTime;
+import java.util.HashSet;
+import java.util.Set;
 
 /**
- * Represents a daily snapshot of an asset held within a trade.
+ * Represents a daily snapshot of a trade’s state.
  * <p>
- * A {@code TradeSnapshot} captures the state of a trade on a particular day, including price values, quantity,
- * transaction fees, and optional buy/sell timestamps. Multiple snapshots can be linked to a single {@link Trade}
- * to track its performance over time. Snapshots are indirectly linked to a {@link JournalEntry} through their parent trade.
+ * A {@code TradeSnapshot} belongs to a {@link Trade}, capturing market data, remaining quantity,
+ * and any {@link ExecutedSale}s made on that day.
+ * </p>
+ * <p>
+ * It is also part of a {@link JournalEntry}, linking the trade’s daily evolution to a specific date.
  * </p>
  */
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -29,62 +32,60 @@ public class TradeSnapshot {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Asset name is required")
-    private String assetName;
-
-    @NotBlank(message = "Asset type is required, e.g. STOCK, ETF, FOND")
-    private String assetType;
-
     /**
-     * The time of day the asset was purchased.
-     * Combined with the journal entry date to determine the full buy timestamp.
+     * The number of units still held at the time of this snapshot.
+     * Decreases as {@link ExecutedSale}s are performed.
      */
-    private LocalTime buyTime;
+    @NotNull(message = "Remaining quantity is required")
+    @PositiveOrZero(message = "Remaining quantity cannot be negative")
+    private int remainingQuantity;
 
     /**
-     * The time of day the asset was sold.
-     * Used to calculate trade duration and detect weekend spans.
+     * The market opening price per unit of the asset on this day.
      */
-    private LocalTime sellTime;
+    @NotNull(message = "Opening price is required")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Opening price must be greater than 0")
+    @Column(precision = 10, scale = 4)
+    private BigDecimal openPrice;
 
     /**
-     * The asset's value at the time of purchase.
-     * Used as the trade’s buy value if this snapshot is the first in the trade.
+     * The market closing price per unit of the asset on this day.
      */
-    @NotNull(message = "Start value is required")
-    @Positive(message = "Start value must be positive")
-    private BigDecimal startValue;
+    @NotNull(message = "Closing price is required")
+    @DecimalMin(value = "0.0", message = "Closing price cannot be negative")
+    @Column(precision = 10, scale = 4)
+    private BigDecimal closePrice;
 
     /**
-     * The asset's value at the time of sale.
-     * Used as the trade’s sell value if this snapshot is the last in the trade.
-     */
-    @PositiveOrZero(message = "End value must be positive")
-    private BigDecimal endValue;
-
-    @NotNull
-    @Positive(message = "Quantity must be at least 1")
-    private int quantity;
-
-    @NotNull
-    @PositiveOrZero(message = "Buy fee cannot be negative")
-    private double buyFee; // TODO: Move to Trade?
-
-    @NotNull
-    @PositiveOrZero(message = "Sell fee cannot be negative")
-    private double sellFee; // TODO: Move to Trade?
-
-    /**
-     * Any notes related to this specific snapshot, e.g. strategy or emotions.
+     * Optional notes tied to this specific day of the trade.
+     * Can include reflections, strategies, or external market factors.
      */
     private String notes;
 
     /**
-     * The trade this snapshot belongs to. Required.
+     * The trade this snapshot belongs to.
+     * Provides access to original quantity and aggregate trade data.
      */
     @ManyToOne(optional = false)
     @JoinColumn(name = "trade_id", nullable = false)
-    @ToString.Exclude
     @EqualsAndHashCode.Exclude
     private Trade trade;
+
+    /**
+     * The journal entry (date) this snapshot is associated with.
+     * Links the snapshot to the specific day it was recorded.
+     */
+    @ManyToOne(optional = false)
+    @JoinColumn(name = "journal_entry_id", nullable = false)
+    private JournalEntry journalEntry;
+
+    /**
+     * Executed sales that occurred on this day as part of the ongoing trade.
+     * Each sale is tied to this snapshot and reflects actual sell transactions.
+     */
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "snapshot_id")
+    @ToString.Exclude
+    @Builder.Default
+    private Set<ExecutedSale> executedSales = new HashSet<>();
 }
