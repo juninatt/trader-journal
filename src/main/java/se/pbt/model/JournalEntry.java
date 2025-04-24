@@ -2,15 +2,15 @@ package se.pbt.model;
 
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Objects;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * Represents a daily journal entry that logs all trading activity for a specific date.
@@ -71,8 +71,10 @@ public class JournalEntry {
      * All snapshots of trades recorded for this day.
      * Each snapshot represents a trade’s state on this specific date.
      */
-    @OneToMany(mappedBy = "journalEntry", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @Builder.Default
+    @OneToMany(mappedBy = "journalEntry", cascade = CascadeType.ALL, orphanRemoval = true)
     private Set<TradeSnapshot> tradeSnapshots = new HashSet<>();
 
 
@@ -90,4 +92,20 @@ public class JournalEntry {
             tradeSnapshots.add(snapshot);
         }
     }
+
+
+    /**
+     * Returns a distinct set of {@link Trade} instances associated with this journal entry.
+     * <p>
+     * Since trades are not stored directly on the entry, this method extracts them
+     * by traversing the associated {@link TradeSnapshot}s and collecting their {@link Trade} references.
+     * </p>
+     */
+    public Set<Trade> getTrades() {
+        return tradeSnapshots.stream()
+                .map(TradeSnapshot::getTrade)
+                .filter(Objects::nonNull)
+                .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
 }

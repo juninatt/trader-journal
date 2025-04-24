@@ -8,6 +8,7 @@ import lombok.*;
 import se.pbt.model.asset.Asset;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalTime;
 import java.util.HashSet;
 import java.util.Set;
@@ -114,4 +115,71 @@ public class Trade {
             tradeSnapshots.add(snapshot);
         }
     }
+
+    /**
+     * Calculates the current total market value of this trade,
+     * based on the latest snapshot’s close price and remaining quantity.
+     *
+     * @return The estimated market value in SEK, or 0 if no snapshots are available.
+     */
+    public BigDecimal calculateCurrentValue() {
+        return tradeSnapshots.stream()
+                .reduce(BigDecimal.ZERO, (acc, snapshot) -> {
+                    if (snapshot.getClosePrice() != null) {
+                        return acc.add(snapshot.getClosePrice()
+                                .multiply(BigDecimal.valueOf(snapshot.getRemainingQuantity())));
+                    }
+                    return acc;
+                }, BigDecimal::add);
+    }
+
+    /**
+     * Calculates the net gain/loss since the trade began.
+     * Includes proceeds from all executed sales and current market value of unsold units.
+     *
+     * @return Net gain in SEK, accounting for buy fee and sales.
+     */
+    public BigDecimal calculateNetGain() {
+        BigDecimal grossSaleProceeds = tradeSnapshots.stream()
+                .flatMap(s -> s.getExecutedSales().stream())
+                .map(ExecutedSale::getNetGain)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        BigDecimal currentValue = calculateCurrentValue();
+        BigDecimal initialInvestment = entryPrice.multiply(BigDecimal.valueOf(quantity)).add(buyFee);
+
+        return grossSaleProceeds.add(currentValue).subtract(initialInvestment);
+    }
+
+    /**
+     * Calculates the percentage change in value since the trade was opened.
+     * Based on net gain vs. initial investment.
+     *
+     * @return Percentage change rounded to two decimals, or 0 if invalid.
+     */
+    public BigDecimal calculateNetGainPercentage() {
+        BigDecimal initial = entryPrice.multiply(BigDecimal.valueOf(quantity)).add(buyFee);
+
+        if (initial.compareTo(BigDecimal.ZERO) == 0) {
+            return BigDecimal.ZERO;
+        }
+
+        return calculateNetGain()
+                .divide(initial, 4, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(2, RoundingMode.HALF_UP);
+    }
+
+    /**
+     * Calculates the number of remaining units across all snapshots.
+     * Useful for determining open position size.
+     *
+     * @return Remaining quantity that has not been sold.
+     */
+    public int getRemainingQuantity() {
+        return tradeSnapshots.stream()
+                .mapToInt(TradeSnapshot::getRemainingQuantity)
+                .sum();
+    }
+
 }

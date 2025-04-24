@@ -24,8 +24,7 @@ public class ServiceLocator {
     public static JournalEntryService getJournalEntryService() {
         if (journalEntryService == null) {
             journalEntryService = new JournalEntryService(
-                    new JournalEntryRepositoryImpl(emf),
-                    new JournalAnalysisService()
+                    new JournalEntryRepositoryImpl(emf)
             );
         }
         return journalEntryService;

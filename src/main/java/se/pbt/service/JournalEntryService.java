@@ -3,27 +3,21 @@ package se.pbt.service;
 import se.pbt.model.JournalEntry;
 import se.pbt.repository.JournalEntryRepository;
 
-import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
 /**
  * Service layer for working with journal entries and related trades.
- * <p>
- * Handles saving, fetching, and basic analysis by delegating to {@link JournalAnalysisService}.
- * </p>
  */
 public class JournalEntryService {
 
     private final JournalEntryRepository journalRepo;
-    private final JournalAnalysisService analysisService;
 
     /**
      * Constructs a JournalService with the given repositories and analysis service.
      */
-    public JournalEntryService(JournalEntryRepository journalRepo, JournalAnalysisService analysisService) {
+    public JournalEntryService(JournalEntryRepository journalRepo) {
         this.journalRepo = journalRepo;
-        this.analysisService = analysisService;
     }
 
     /**
@@ -52,15 +46,5 @@ public class JournalEntryService {
      */
     public Optional<JournalEntry> getLatestEntry() {
         return journalRepo.findLatestEntry();
-    }
-
-
-    /**
-     * Calculates the total change in currency for a specific journal entry.
-     */
-    public BigDecimal getTotalChangeForEntry(Long id) {
-        return journalRepo.findById(id)
-                .map(analysisService::calculateTotalChangeKr)
-                .orElse(BigDecimal.ZERO);
     }
 }
