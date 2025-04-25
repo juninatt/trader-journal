@@ -17,34 +17,36 @@ This will make it easier to spot habits, strengths, and areas for improvement in
 - H2 (in-memory database)
 - Lombok
 
-### JavaFX Setup
+## Running the application
 
-This project uses **JavaFX 17** for its graphical interface. To run the GUI properly, you need to set up the JavaFX runtime on your local machine.
+JavaFX dependencies are handled via Maven using the **JavaFX Maven plugin**, so no manual SDK setup is required unless you're running the app in an IDE.
 
-**GUI Main Class:** `se.pbt.ui.TraderJournalGui`  
-This is the class that launches the graphical interface and should be used when running the application.
+**Note:** Always run commands from the project root directory (where the `pom.xml` file is located).
 
-#### Step 1: Download JavaFX SDK
-1. Go to the Gluon [product page](https://gluonhq.com/products/javafx/) (it´s free)
-2. Download **JavaFX SDK 17** for your operating system.
-3. Extract the SDK to a convenient location, e.g.:
-```bash 
-C:\Program Files\javafx\javafx-sdk-17\lib
+### ▶ Run with Maven (Recommended)
+
+The application is configured to run directly from the terminal using Maven:
+```bash
+  mvn clean javafx:run
+```
+This command will build the project and launch the GUI automatically using the class se.pbt.ui.TraderJournalGui.
+
+### Running the application in an IDE (Optional)
+
+If you prefer to run the application manually in an IDE some extra setup is required due to how JavaFX is modularized.
+
+Step 1: Download JavaFX SDK
+Go to the Gluon [product page](https://gluonhq.com/products/javafx/)(it's free) to download JavaFX SDK 17, and extract it to a location of your choice, for example:
+``` 
+C:\Program Files\javafx\javafx-sdk-17
  ```
-☝️ Make sure to replace the path with your actual JavaFX SDK location.
 
-#### Step 2: Configure your runtime environment
-When running the application, make sure to provide the JavaFX module path and required modules as VM options.
-```bash 
+Step 2: Add VM options in your IDE's run configuration
+In your IDE's run configuration for the main class se.pbt.ui.TraderJournalGui, add the following VM options:
+``` 
 --module-path "C:\your_chosen_path\javafx-sdk-17\lib" --add-modules javafx.controls,javafx.fxml
  ```
-Where to set this:
-* In an IDE: Add it to the VM options field of your run configuration.
-* From the command line: Add it after java in your launch command:
-```bash
-java --module-path "C:\your_chosen_path\javafx-sdk-17\lib" --add-modules javafx.controls,javafx.fxml -cp your-jar-file.jar your.MainClass
- ```
-☝️ Again, make sure to replace the path with your actual JavaFX SDK location.
+☝️ Make sure to replace the path with your actual JavaFX SDK location.
 
 ### Lombok
 This project uses Lombok, a library that automatically generates boilerplate code such as getters, setters, and constructors. 
