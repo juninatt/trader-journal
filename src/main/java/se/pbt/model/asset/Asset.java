@@ -3,6 +3,7 @@ package se.pbt.model.asset;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 import se.pbt.model.Trade;
@@ -107,14 +108,16 @@ public class Asset {
     /**
      * Sectors the asset belongs to (e.g., Technology, Financials).
      */
+    @NotEmpty(message = "At least 1 Sector is required")
     @ElementCollection
-    private List<@NotBlank Sector> sectors;
+    private List< Sector> sectors;
 
     /**
      * Industries the asset is associated with (e.g., Semiconductors).
      */
+    @NotEmpty(message = "At least 1 Industry is required")
     @ElementCollection
-    private List<@NotNull Industry> industries;
+    private List<Industry> industries;
 
     /**
      * Timestamp of the last update to the asset information.

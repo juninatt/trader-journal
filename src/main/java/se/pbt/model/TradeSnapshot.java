@@ -66,7 +66,7 @@ public class TradeSnapshot {
      * The trade this snapshot belongs to.
      * Provides access to original quantity and aggregate trade data.
      */
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "trade_id", nullable = false)
     @EqualsAndHashCode.Exclude
     private Trade trade;

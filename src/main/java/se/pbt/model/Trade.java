@@ -87,7 +87,7 @@ public class Trade {
      * The asset being traded.
      * Every trade must reference one asset; an asset can be shared across multiple trades.
      */
-    @ManyToOne(optional = false)
+    @ManyToOne(optional = false, cascade = CascadeType.PERSIST)
     @JoinColumn(name = "asset_id", nullable = false)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
