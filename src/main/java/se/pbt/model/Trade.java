@@ -97,7 +97,7 @@ public class Trade {
      * All snapshots associated with this trade.
      * Each snapshot represents the state of the trade on a particular day.
      */
-    @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "trade", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     @Builder.Default
     private Set<TradeSnapshot> tradeSnapshots = new HashSet<>();
 

@@ -1,41 +1,50 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.*?>
-<?import javafx.scene.layout.HBox?>
-<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.*?>
 <VBox spacing="10" xmlns="http://javafx.com/javafx"
       xmlns:fx="http://javafx.com/fxml"
       fx:controller="se.pbt.ui.JournalEntryController"
       alignment="TOP_CENTER" style="-fx-padding: 20;">
 
-    <Label text="Latest Journal Entry" style="-fx-font-size: 16px;"/>
+    <Label text="Latest Journal Entry"
+           style="-fx-font-size: 20px; -fx-font-weight: bold;" />
 
-    <HBox spacing="10" alignment="CENTER_LEFT">
-        <Label text="Comment:"/>
-        <TextField fx:id="commentField" prefWidth="400"/>
+    <!-- Cash info & Capital -->
+    <HBox spacing="40" alignment="CENTER_LEFT">
+        <VBox spacing="2">
+            <Label text="Available Cash:" style="-fx-font-weight: bold;" />
+            <Label fx:id="cashLabel" />
+        </VBox>
+        <VBox spacing="2">
+            <Label text="Invested Capital:" style="-fx-font-weight: bold;" />
+            <Label fx:id="investedLabel" />
+        </VBox>
     </HBox>
 
-    <TableView fx:id="snapshotTable" prefHeight="300" prefWidth="1000">
-        <columns>
-            <TableColumn fx:id="assetNameColumn" text="Asset Name"/>
-            <TableColumn fx:id="assetTypeColumn" text="Type"/>
-            <TableColumn fx:id="buyTimeColumn" text="Buy Time"/>
-            <TableColumn fx:id="sellTimeColumn" text="Sell Time"/>
-            <TableColumn fx:id="startValueColumn" text="Start Value"/>
-            <TableColumn fx:id="endValueColumn" text="End Value"/>
-            <TableColumn fx:id="quantityColumn" text="Quantity"/>
-            <TableColumn fx:id="buyFeeColumn" text="Buy Fee"/>
-            <TableColumn fx:id="sellFeeColumn" text="Sell Fee"/>
-            <TableColumn fx:id="notesColumn" text="Notes"/>
-        </columns>
-    </TableView>
 
+    <!-- Main trade layout -->
+    <HBox spacing="30" alignment="TOP_CENTER" prefHeight="400">
+        <VBox fx:id="previousTradesBox" spacing="10" prefWidth="480">
+            <Label text="Previous Entry" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+        </VBox>
 
-    <HBox spacing="10">
-        <Button text="Add Asset" onAction="#handleAddAsset"/>
-        <Button text="Edit Selected" onAction="#onEditSnapshot"/>
-        <Button text="Delete Selected" onAction="#onDeleteSnapshot"/>
-        <Button text="Save Journal Entry" onAction="#handleSaveJournalEntry"/>
+        <VBox fx:id="currentTradesBox" spacing="10" prefWidth="480">
+            <Label text="Today's Entry" style="-fx-font-size: 14px; -fx-font-weight: bold;" />
+        </VBox>
+    </HBox>
+
+    <!-- Button and comment area -->
+    <HBox spacing="20" alignment="CENTER" prefWidth="1000">
+        <HBox spacing="10" alignment="CENTER_LEFT">
+            <Button text="Add Asset" onAction="#handleAddAsset" />
+            <Button text="Save Journal Entry" onAction="#handleSaveJournalEntry" />
+        </HBox>
+        <Pane HBox.hgrow="ALWAYS"/>
+        <HBox spacing="10" alignment="CENTER_RIGHT">
+            <Label text="Comment:" />
+            <TextField fx:id="commentField" prefWidth="400" />
+        </HBox>
     </HBox>
 
 </VBox>

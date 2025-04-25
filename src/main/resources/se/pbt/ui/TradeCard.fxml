@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<VBox fx:id="cardRoot" xmlns:fx="http://javafx.com/fxml"
+      fx:controller="se.pbt.ui.TradeCardController"
+      style="-fx-padding: 10; -fx-border-color: lightgray; -fx-border-width: 1; -fx-background-color: white;"
+      spacing="5">
+
+    <!-- Main info -->
+    <HBox spacing="10" alignment="CENTER_LEFT">
+        <Button fx:id="expandButton" text="▼" onAction="#toggleExpand" style="-fx-font-size: 10px;" />
+        <VBox spacing="2">
+            <Label fx:id="assetNameLabel" style="-fx-font-size: 16px; -fx-font-weight: bold;" />
+            <Label fx:id="valueChangePctLabel" />
+        </VBox>
+        <Pane HBox.hgrow="ALWAYS" />
+        <VBox alignment="CENTER_RIGHT">
+            <Label fx:id="totalValueLabel" />
+            <Label fx:id="valueChangeLabel" />
+        </VBox>
+    </HBox>
+
+    <!-- Expanded info -->
+    <VBox fx:id="expandedInfo" visible="false" managed="false" spacing="5" style="-fx-padding: 5 0 0 20;">
+        <HBox spacing="20">
+            <Label fx:id="assetClassLabel" />
+            <Label fx:id="quantityLabel" />
+            <Label fx:id="snapshotCountLabel" />
+            <Label fx:id="exchangeLabel" />
+        </HBox>
+    </VBox>
+</VBox>
