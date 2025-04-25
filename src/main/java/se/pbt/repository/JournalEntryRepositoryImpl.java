@@ -69,10 +69,23 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
     @Override
     public Optional<JournalEntry> findById(Long id) {
         EntityManager em = emf.createEntityManager();
-        JournalEntry found = em.find(JournalEntry.class, id);
-        em.close();
-        return Optional.ofNullable(found);
+        try {
+            List<JournalEntry> results = em.createQuery("""
+                    SELECT j
+                    FROM JournalEntry j
+                    LEFT JOIN FETCH j.tradeSnapshots ts
+                    LEFT JOIN FETCH ts.trade t
+                    LEFT JOIN FETCH t.asset
+                    WHERE j.id = :id
+                """, JournalEntry.class)
+                    .setParameter("id", id)
+                    .getResultList();
+            return results.stream().findFirst();
+        } finally {
+            em.close();
+        }
     }
+
 
     /**
      * {@inheritDoc}
@@ -80,14 +93,14 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
     @Override
     public List<JournalEntry> findAll() {
         EntityManager em = emf.createEntityManager();
-        List<JournalEntry> result = em
-                .createQuery("""
+        List<JournalEntry> result = em.createQuery("""
                     SELECT DISTINCT j
                     FROM JournalEntry j
-                    LEFT JOIN FETCH j.trades t
-                    LEFT JOIN FETCH t.snapshots
+                    LEFT JOIN FETCH j.tradeSnapshots ts
+                    LEFT JOIN FETCH ts.trade t
+                    LEFT JOIN FETCH t.asset
                     ORDER BY j.date DESC
-                    """, JournalEntry.class)
+                """, JournalEntry.class)
                 .getResultList();
         em.close();
         return result;
@@ -103,10 +116,11 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
         JournalEntry latest = em.createQuery("""
                     SELECT j
                     FROM JournalEntry j
-                    LEFT JOIN FETCH j.trades t
-                    LEFT JOIN FETCH t.snapshots
+                    LEFT JOIN FETCH j.tradeSnapshots ts
+                    LEFT JOIN FETCH ts.trade t
+                    LEFT JOIN FETCH t.asset
                     ORDER BY j.date DESC
-                    """, JournalEntry.class)
+                """, JournalEntry.class)
                 .setMaxResults(1)
                 .getResultStream()
                 .findFirst()
@@ -114,5 +128,4 @@ public class JournalEntryRepositoryImpl implements JournalEntryRepository {
         em.close();
         return Optional.ofNullable(latest);
     }
-
 }

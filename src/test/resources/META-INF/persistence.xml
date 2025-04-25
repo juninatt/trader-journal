@@ -9,6 +9,8 @@
         <class>se.pbt.model.JournalEntry</class>
         <class>se.pbt.model.Trade</class>
         <class>se.pbt.model.TradeSnapshot</class>
+        <class>se.pbt.model.asset.Asset</class>
+        <class>se.pbt.model.ExecutedSale</class>
 
         <properties>
             <!-- H2 in file mode (persistent between runs) -->

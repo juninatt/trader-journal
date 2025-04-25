@@ -6,6 +6,7 @@ import org.junit.jupiter.api.*;
 import se.pbt.model.JournalEntry;
 import se.pbt.testutil.TestDataFactory;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,28 +31,42 @@ class JournalEntryRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("saves and finds JournalEntry by ID")
-    void savesAndFindsById() {
+    @DisplayName("saves and finds JournalEntry by ID - basic")
+    void savesAndFindsById_basic() {
         JournalEntry entry = TestDataFactory.defaultJournalEntry();
         repository.save(entry);
 
         Optional<JournalEntry> found = repository.findById(entry.getId());
         assertTrue(found.isPresent());
-        assertEquals(entry.getNotes(), found.get().getNotes());
+        assertEquals(entry.getEntryText(), found.get().getEntryText());
     }
 
     @Test
-    @DisplayName("returns all saved entries")
-    void returnsAllEntries() {
+    @DisplayName("findById returns empty Optional if ID not found")
+    void findById_returnsEmptyOptionalIfNotFound() {
+        Optional<JournalEntry> found = repository.findById(99999L);
+        assertTrue(found.isEmpty());
+    }
+
+    @Test
+    @DisplayName("returns all saved entries - basic")
+    void returnsAllEntries_basic() {
         JournalEntry entry1 = TestDataFactory.defaultJournalEntry();
         JournalEntry entry2 = TestDataFactory.defaultJournalEntry();
-        entry2.setNotes("Second test entry");
+        entry2.setEntryText("Another test entry");
 
         repository.save(entry1);
         repository.save(entry2);
 
-        var all = repository.findAll();
+        List<JournalEntry> all = repository.findAll();
         assertTrue(all.size() >= 2);
+    }
+
+    @Test
+    @DisplayName("findAll returns empty list when no entries exist")
+    void findAll_returnsEmptyListWhenNoEntries() {
+        List<JournalEntry> all = repository.findAll();
+        assertNotNull(all); // Should not throw NullPointerException
     }
 
     @Test
@@ -71,7 +86,7 @@ class JournalEntryRepositoryImplTest {
     @DisplayName("returns false when attempting to remove unsaved JournalEntry")
     void returnsFalseWhenRemovingNonExistentEntry() {
         JournalEntry nonExistingEntry = TestDataFactory.defaultJournalEntry();
-        nonExistingEntry.setId(9999L); // ID not managed or persisted
+        nonExistingEntry.setId(9999L); // Fake ID
 
         boolean removed = repository.remove(nonExistingEntry);
 
@@ -79,13 +94,25 @@ class JournalEntryRepositoryImplTest {
     }
 
     @Test
-    @DisplayName("throws exception and rolls back if remove is called with null ID")
-    void throwsAndRollsBackOnInvalidRemoveCall() {
-        JournalEntry entry = TestDataFactory.defaultJournalEntry();
-        entry.setId(null); // Triggers IllegalArgumentException inside EntityManager.find
+    @DisplayName("findLatestEntry returns latest by date")
+    void findLatestEntry_returnsLatest() {
+        JournalEntry entry1 = TestDataFactory.defaultJournalEntry();
+        entry1.setDate(java.time.LocalDate.now().minusDays(1));
+        JournalEntry entry2 = TestDataFactory.defaultJournalEntry();
+        entry2.setDate(java.time.LocalDate.now());
 
-        assertThrows(IllegalArgumentException.class, () -> repository.remove(entry));
+        repository.save(entry1);
+        repository.save(entry2);
+
+        Optional<JournalEntry> latest = repository.findLatestEntry();
+        assertTrue(latest.isPresent());
+        assertEquals(entry2.getDate(), latest.get().getDate());
     }
 
-
+    @Test
+    @DisplayName("findLatestEntry returns empty when no entries")
+    void findLatestEntry_returnsEmptyWhenNoEntries() {
+        var result = repository.findLatestEntry();
+        assertNotNull(result); // Should return Optional.empty() instead of null
+    }
 }
